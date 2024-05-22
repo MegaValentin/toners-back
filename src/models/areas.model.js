@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const officeSchema = new mongoose.Schema({
-    nombre: {
+    area: {
         type: String,
         required: true,
         trim: true
