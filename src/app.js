@@ -10,6 +10,6 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use('/api',officesRouter)
 app.use('/api',tonersRoutes)
-app.use('api/', ordersRoutes)
+app.use('/api', ordersRoutes)
 
 export default app

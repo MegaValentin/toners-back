@@ -8,6 +8,10 @@ const ordersSchema = new mongoose.Schema({
     ref: 'Toner',
     required: true
   },
+  tonerName: {
+    type: String,
+    required: true
+  },
   cantidad: {
     type: Number,
     required: true,
@@ -18,10 +22,14 @@ const ordersSchema = new mongoose.Schema({
     ref: 'Area',
     required: true
   },
+  areaName:{
+    type:String,
+    required:true
+  },
   fecha: {
     type: Date,
     default: Date.now
   }
 });
 
-export default mongoose.model('Orden', ordersSchema)
+export default mongoose.model('Order', ordersSchema)

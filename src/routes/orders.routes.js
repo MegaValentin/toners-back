@@ -5,10 +5,10 @@ const router = Router()
 
 router.get('/orders', getOrders)
 
-router.get('/toner', getOrder)
+router.get('/order', getOrder)
 
-router.delete('/toner/:id', deleteOrder)
+router.delete('/order/:id', deleteOrder)
 
-router.post('/addtoners', addOrders)
+router.post('/addorders', addOrders)
 
 export default router
