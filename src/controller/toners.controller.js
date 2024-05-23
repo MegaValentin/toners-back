@@ -10,7 +10,26 @@ export const getToners = async (req, res) =>{
     }
 }
 
-export const getToner = async (req, res) =>{}
+export const getToner = async (req, res) =>{
+    try {  
+        const {id} = req.params
+        const toner = await Toners.findById(id)
+
+        if(!toner) {
+            return res.status(404).json({
+                message: "Toner no encontrada"
+            })
+        }
+
+        res.json(toner)
+        
+    } catch (error) {
+        console.error('Error al obtener el toner:', error);
+        res.status(500).json({
+            message:"Error al obtener el toner"
+        })
+    }
+}
 
 export const deleteToner = async (req, res) =>{
     try{
@@ -32,7 +51,33 @@ export const deleteToner = async (req, res) =>{
     }
 }
 
-export const updateToner = async (req, res) =>{}
+export const updatedToner = async (req, res) =>{
+    try {
+        const { id } = req.params
+        const { toner, cantidad} = req.body
+        
+        if(!toner && cantidad === undefined){
+            return res.status(400).json({
+                message:"El campor 'toner' y 'cantidad' son requeridos"
+            })
+        }
+
+        const updatedToner = await Toners.findByIdAndUpdate(id, req.body, {new: true})
+
+        if(!updatedToner){
+            return res.status(404).json({
+                message:"Toner no encontrado"
+            })
+        }
+
+        res.json(updatedToner)
+    } catch (error) {
+        console.error('Error al actualizar el toner:', error);
+        res.status(500).json({
+            message:"Error al actulizar el toner"
+        })
+    }
+}
 
 export const addToners = async (req, res) =>{
     
