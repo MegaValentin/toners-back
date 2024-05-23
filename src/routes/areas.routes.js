@@ -3,18 +3,18 @@ import {
     getOffices,
     getOffice,
     deleteOffice,
-    updateOffice,
+    updatedOffice,
     addOffice } from "../controller/areas.controller.js";
 
 const router = Router()
 
 router.get('/offices', getOffices)
 
-router.get('/office', getOffice)
+router.get('/office/:id', getOffice)
 
 router.delete('/office/:id', deleteOffice)
 
-router.put('office/:id', updateOffice )
+router.put('/office/:id', updatedOffice )
 
 router.post('/addoffice', addOffice)
 

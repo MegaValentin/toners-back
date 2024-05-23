@@ -10,7 +10,26 @@ export const getOffices = async (req, res) =>{
     }
 }
 
-export const getOffice = async (req, res) =>{}
+export const getOffice = async (req, res) =>{
+    try {  
+        const {id} = req.params
+        const office = await Areas.findById(id)
+
+        if(!office) {
+            return res.status(404).json({
+                message: "Area no encontrada"
+            })
+        }
+
+        res.json(office)
+        
+    } catch (error) {
+        console.error('Error al obtener el area:', error);
+        res.status(500).json({
+            message:"Error al obtener el area"
+        })
+    }
+}
 
 export const deleteOffice = async (req, res) =>{
     try{
@@ -32,7 +51,35 @@ export const deleteOffice = async (req, res) =>{
     }
 }
 
-export const updateOffice = async (req, res) =>{}
+export const updatedOffice = async (req, res) =>{
+    try {
+
+        const { area } = req.body;
+    
+        if (!area) {
+        return res.status(400).json({
+            message: "El campo 'area' es requerido"
+        });
+        }
+
+        const office =  await Areas.findByIdAndUpdate(req.params.id, { area }, {
+            new:true
+        })
+        
+        if(!office){
+            return res.status(404).json({
+                message: "Area no encontrada"
+            })
+        }
+
+        res.json(office)
+    } catch (error) {
+        console.error('Error al actualizar el area:', error);
+        res.status(500).json({
+            message:"Error al actualizar el area"
+        })
+    }
+}
 
 export const addOffice = async (req, res) =>{
     try{
