@@ -5,7 +5,7 @@ const router = Router()
 
 router.get('/orders', getOrders)
 
-router.get('/order', getOrder)
+router.get('/order/:id', getOrder)
 
 router.delete('/order/:id', deleteOrder)
 

@@ -6,7 +6,7 @@ export const getToners = async (req, res) =>{
         res.json(toners)
 
     }catch(error){
-        return res.status(500).json({message:"error al buscar las Areas"})
+        return res.status(500).json({message:"error al buscar El toner"})
     }
 }
 
