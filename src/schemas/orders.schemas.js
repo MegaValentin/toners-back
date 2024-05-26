@@ -1,6 +1,6 @@
 import z from 'zod'
 
-export const createTonerSchema = ({
+export const createOrderSchema = ({
     toner: z.string({
         required_error:"El ID del toner es requerido"
     }),
