@@ -88,8 +88,10 @@ export const addOrders = async (req, res) =>{
             area, 
             areaName: areaExists.area })
 
+        console.log(newOrder)
+
         const savedOrder = await newOrder.save()
-            console.log(newOrder.tonerName);
+        console.log(newOrder.tonerName);
         tonerExists.cantidad -= cantidad
         await tonerExists.save()
 
