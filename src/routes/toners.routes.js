@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getToners, getToner, deleteToner, updatedToner, addToners } from "../controller/toners.controller.js";
+import { getToners, getToner,getLowToner, deleteToner, updatedToner, addToners } from "../controller/toners.controller.js";
 import { createTonerSchema } from "../schemas/toners.schemas.js"
 import { validateSchema } from "../middleware/validator.middleware.js";
 const router = Router()
@@ -7,6 +7,8 @@ const router = Router()
 router.get('/toners', getToners)
 
 router.get('/toner/:id', getToner)
+
+router.get('/low-toner', getLowToner)
 
 router.delete('/toner/:id', deleteToner)
 

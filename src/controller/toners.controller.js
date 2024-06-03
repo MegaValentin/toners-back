@@ -31,6 +31,17 @@ export const getToner = async (req, res) => {
     }
 }
 
+export const getLowToner = async (req,res) => {
+    try {
+        const lowToner = await Toners.find({cantidad: {$lte:2}})
+        res.status(200).json(lowToner)
+
+    } catch (error) {
+        console.error('Error fetching low toner: ', error);
+        res.status(500).json({message: 'Error fetchin low toner'})
+    }
+}
+
 export const deleteToner = async (req, res) => {
     try {
 
