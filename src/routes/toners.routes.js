@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getToners, getToner,getLowToner, deleteToner, updatedToner, addToners } from "../controller/toners.controller.js";
+import { getToners, getToner,getLowToner, deleteToner, updatedToner, addToners, postReStock, restockAllPost} from "../controller/toners.controller.js";
 import { createTonerSchema } from "../schemas/toners.schemas.js"
 import { validateSchema } from "../middleware/validator.middleware.js";
 const router = Router()
@@ -15,5 +15,9 @@ router.delete('/toner/:id', deleteToner)
 router.put('/toner/:id', updatedToner )
 
 router.post('/addtoners',validateSchema(createTonerSchema), addToners)
+
+router.post('/restock', postReStock)
+
+router.post('/restockall', restockAllPost)
 
 export default router

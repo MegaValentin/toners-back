@@ -117,3 +117,54 @@ export const addToners = async (req, res) => {
         res.status(500).json({ message: 'Error al agregar el toner.' })
     }
 }
+
+export const postReStock = async (req,res) => {
+    try {
+        const {tonerId, cantidad } = req.body
+
+        if (!tonerId || !cantidad || cantidad <=0){
+            return res.status(400).json({message: "El ID del toner y la cantidad son requeridos"})
+        } 
+
+        const toner = await Toners.findById(tonerId)
+        if(!toner) {
+            return res.status(404).json({message:"Toner no encontrado"})
+        }
+
+        toner.cantidad += cantidad
+        await toner.save()
+
+        
+        res.status(200).json({message: "toner reabastecido exitosamente", toner})
+
+    } catch (error) {
+        console.error("Error en el restock de toner: ", error)
+        res.status(500).json({message:"Error en el restock de toner:"})
+    }
+}
+
+export const restockAllPost = async (req, res) => {
+    try {
+        const { restocks } = req.body
+
+        if(!restocks || !Array.isArray(restocks)){
+            return res.status(400).json({message:"Invalid restock data"})
+        }
+        
+        const updatePromise = restocks.map(async (restock) => {
+            const toner = await Toners.findById(restock.tonerId)
+
+            if(toner){
+                toner.cantidad += restock.cantidad
+                toner.alert = toner.cantidad <=1
+                await toner.save()
+            }
+        })
+
+        await Promise.all(updatePromise)
+        res.status(200).json({ message: 'Restock completed successfully', restocks});
+    } catch (error) {
+        console.error('Error in restock', error);
+        res.status(500).json({message: 'Error in restock'})
+    }
+}

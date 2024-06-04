@@ -16,6 +16,8 @@
     "mongodb": "^6.6.2",
     "mongoose": "^8.4.0",
     "morgan": "^1.10.0",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
