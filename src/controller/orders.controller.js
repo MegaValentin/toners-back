@@ -1,3 +1,8 @@
+import PDFDocument from 'pdfkit';
+import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import Order from "../models/orders.model.js";
 import Toners from "../models/toners.model.js";
 import Areas from "../models/areas.model.js";
@@ -51,9 +56,12 @@ export const deleteOrder = async (req, res) => {
   }
 };
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export const addOrders = async (req, res) => {
   try {
-    const { toner, cantidad, area } = req.body;
+    const { toner, cantidad, area, email } = req.body;
 
     if (!toner || !cantidad || !area) {
       return res.status(400).json({
@@ -94,6 +102,59 @@ export const addOrders = async (req, res) => {
 
     tonerExists.cantidad -= cantidad;
     await tonerExists.save();
+
+    const pdfPath = path.join(__dirname, `order-${savedOrder._id}.pdf`);
+    const doc = new PDFDocument()
+    doc.pipe(fs.createWriteStream(pdfPath))
+
+    doc.fontSize(25).text('Entrega de Toner', {align:'center'})
+    doc.moveDown()
+    doc.fontSize(14).text(`Fecha: ${new Date().toLocaleDateString()}`)
+    doc.moveDown()
+    doc.text(`Area: ${areaExists.area}`)
+    doc.text(`Toner: ${tonerExists.toner}`)
+    doc.text(`Cantidad: ${cantidad}`)
+    doc.moveDown()
+    doc.text('Firma: ', {underline:true})
+    doc.text('Nombre y Apellido:', {underline:true})
+
+    doc.end()
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth:{
+        user:'gestiondetoner@gmail.com',
+        pass:'r q y g z cm p e j b g q f l e'
+      }
+    })
+
+    const mailOptions = {
+      from: 'gestiondetoner@gmail.com',
+      to: 'valentinmega3@gmail.com',
+      subject: 'Confirmación de Entrega de Tóner',
+      text: 'Adjunto encontrará el PDF con los detalles de la entrega del tóner.',
+      attachments: [
+        {
+          filename: `order-${savedOrder._id}.pdf`,
+          path: pdfPath,
+        },
+      ],
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      fs.unlink(pdfPath, (err) => {
+        if (err) {
+          console.error('Error al eliminar el archivo PDF:', err);
+        } else {
+          console.log('Archivo PDF eliminado:', pdfPath);
+        }
+      })
+      if (error) {
+        return console.log(error);
+      }
+      console.log('Email sent: ' + info.response);
+    });
+   
 
     let areaUsage = await AreaUsage.findOne({ area });
     if (!areaUsage) {
