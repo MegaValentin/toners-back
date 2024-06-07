@@ -1,6 +1,7 @@
 import PDFDocument from 'pdfkit';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import xlsx from 'xlsx';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Order from "../models/orders.model.js";
@@ -116,6 +117,7 @@ export const addOrders = async (req, res) => {
     doc.text(`Cantidad: ${cantidad}`)
     doc.moveDown()
     doc.text('Firma: ', {underline:true})
+    doc.moveDown()
     doc.text('Nombre y Apellido:', {underline:true})
 
     doc.end()
@@ -130,9 +132,9 @@ export const addOrders = async (req, res) => {
 
     const mailOptions = {
       from: 'gestiondetoner@gmail.com',
-      to: 'valentinmega3@gmail.com',
+      to: 'gestiontoner@bolivar.gob.ar',
       subject: 'Confirmación de Entrega de Tóner',
-      text: 'Adjunto encontrará el PDF con los detalles de la entrega del tóner.',
+      text: `Adjunto encontrará el PDF con los detalles de la entrega del ${tonerExists.toner} para ${areaExists.area}.`,
       attachments: [
         {
           filename: `order-${savedOrder._id}.pdf`,
@@ -189,11 +191,41 @@ export const addOrders = async (req, res) => {
   }
 };
 
+
 export const getAreaUsage = async (req, res) => {
-    try {
-        const areaUsage = await AreaUsage.find();
-        res.json(areaUsage);
-      } catch (error) {
-        return res.status(500).json({ message: "error al buscar las ordenes" });
-      }
+  try {
+    const areaUsage = await AreaUsage.find();
+    res.json(areaUsage);
+  } catch (error) {
+    return res.status(500).json({ message: "error al buscar las ordenes" });
+  }
+}
+
+export const createStock = async (req, res) => {
+  const file = req.file;
+  if (!file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  try {
+    // Leer el archivo Excel
+    const workbook = xlsx.readFile(file.path);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+    
+    for (const row of jsonData) {
+      const { Toner, cantidad } = row;
+      const newIdealStock = new stockIdeal({ toner: Toner, stockIdeal: cantidad });
+      await newIdealStock.save();
+    }
+
+    
+    fs.unlinkSync(file.path);
+
+    res.status(201).json({ message: 'Stock ideal creado desde el archivo Excel' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
