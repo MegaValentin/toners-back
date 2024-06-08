@@ -44,3 +44,12 @@ export const getIdealStocks = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 }
+
+export const checkDataExists = async (req, res) => {
+  try {
+    const count = await StockIdeal.countDocuments();
+    res.status(200).json({ dataExists: count > 0 });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
