@@ -1,10 +1,12 @@
 import StockIdeal from "../models/stockIdeal.model.js"
 import xlsx from 'xlsx';
 import fs from 'fs';
+import path from "path";
+
 
 export const createIdealStock = async (req, res) => {
-    const file = req.file; // Suponiendo que el archivo se envía como parte de un formulario
-  console.log(file);
+    const file = req.file; 
+    
     if (!file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -15,13 +17,14 @@ export const createIdealStock = async (req, res) => {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = xlsx.utils.sheet_to_json(worksheet);
-
     
-    for (const row of jsonData) {
-      const { Toner, cantidad } = row;
-      const newIdealStock = new StockIdeal({ toner: Toner, stockIdeal: cantidad });
-      await newIdealStock.save();
-    }
+    
+    const newIdealStocks = jsonData.map((row) => ({
+      toner: row.Toner,
+      stockIdeal: row.Cantidad || 0,  
+    }));
+    
+    await StockIdeal.insertMany(newIdealStocks);
 
     
     fs.unlinkSync(file.path);
