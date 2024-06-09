@@ -1,4 +1,5 @@
 import StockIdeal from "../models/stockIdeal.model.js"
+import Toners from "../models/toners.model.js"
 import xlsx from 'xlsx';
 import fs from 'fs';
 import path from "path";
@@ -53,3 +54,27 @@ export const checkDataExists = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const pedidoStock = async (req, res ) => {
+  try {
+    const currentStock = await Toners.find({})
+    const idealStocks = await StockIdeal.find({})
+
+    const stockCompare = idealStocks.map((ideal)=>{
+      const current = currentStock.find(item => item.toner === ideal.toner)
+      const currentCantidad = current ? current.cantidad : 0
+      const needed = ideal.stockIdeal - currentCantidad
+
+      return {
+        toner: ideal.toner,
+        ideal : ideal.stockIdeal,
+        current : currentCantidad,
+        needed: needed > 0 ? needed : 0
+      }
+      
+    })
+    res.status(200).json(stockCompare)
+  } catch (error) {
+    res.status(500).json([{error: error.message}])
+  }
+}
