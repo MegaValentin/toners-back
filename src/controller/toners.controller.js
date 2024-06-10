@@ -1,4 +1,6 @@
 import Toners from "../models/toners.model.js"
+import xlsx from 'xlsx';
+import fs from 'fs';
 
 export const getToners = async (req, res) => {
     try {
@@ -168,3 +170,34 @@ export const restockAllPost = async (req, res) => {
         res.status(500).json({message: 'Error in restock'})
     }
 }
+
+export const addAllToners = async (req,res) => {
+    const file = req.file
+    if (!file) {
+        return res.status(400).json({error: "No file upload"})
+
+    }
+
+    try {
+        const book = xlsx.readFile(file.path)
+        const sheetName = book.SheetNames[0]
+        const worksheet = book.Sheets[sheetName]
+        const data = xlsx.utils.sheet_to_json(worksheet)
+
+        const newToner = data.map((row) => ({
+            toner:row.Toner,
+            cantidad: row.Cantidad || 0
+        }))
+
+        await Toners.insertMany(newToner)
+
+        fs.unlinkSync(file.path)
+
+        res.status(201).json({message:'Stock creado desde el archivo Excel'})
+
+
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+
+} 
