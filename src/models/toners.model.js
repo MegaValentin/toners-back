@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const tonersSchema = new mongoose.Schema({
+    marca:{
+        type: String,
+        require:true,
+    },
     toner: {
         type: String,
         required: true,

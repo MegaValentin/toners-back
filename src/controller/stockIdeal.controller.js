@@ -23,6 +23,7 @@ export const createIdealStock = async (req, res) => {
     
     
     const newIdealStocks = jsonData.map((row) => ({
+      marca: row.Marca,
       toner: row.Toner,
       stockIdeal: row.Cantidad || 0,  
     }));
@@ -68,6 +69,7 @@ export const pedidoStock = async (req, res ) => {
       const needed = ideal.stockIdeal - currentCantidad
 
       return {
+        marca: ideal.marca,
         toner: ideal.toner,
         ideal : ideal.stockIdeal,
         current : currentCantidad,
@@ -91,6 +93,7 @@ export const enviarPedidoStock = async (req, res) => {
       const currentCantidad = actual ? actual.cantidad : 0
       const pedido = ideal.stockIdeal  - currentCantidad
       return {
+        Marca: ideal.marca,
         Toner: ideal.toner,
         Pedido: pedido
       };
@@ -129,7 +132,7 @@ export const enviarPedidoStock = async (req, res) => {
 
     doc.fontSize(12).text('Pedido Recomendado:', { underline: true });
     recommendedOrder.forEach(order => {
-      doc.text(`Toner: ${order.Toner}, Pedido: ${order.Pedido}`);
+      doc.text(`${order.Marca} ${order.Toner} ........ ${order.Pedido}`);
     });
 
     doc.end();

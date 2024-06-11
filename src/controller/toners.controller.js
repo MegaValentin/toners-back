@@ -67,9 +67,9 @@ export const deleteToner = async (req, res) => {
 export const updatedToner = async (req, res) => {
     try {
         const { id } = req.params
-        const { toner, cantidad } = req.body
+        const { marca, toner, cantidad } = req.body
 
-        if (!toner && cantidad === undefined) {
+        if (!toner && cantidad === undefined && !marca) {
             return res.status(400).json({
                 message: "El campor 'toner' y 'cantidad' son requeridos"
             })
@@ -95,9 +95,9 @@ export const updatedToner = async (req, res) => {
 export const addToners = async (req, res) => {
 
     try {
-        const { toner, cantidad } = req.body;
+        const { toner, cantidad, marca } = req.body;
 
-        if (!toner || cantidad === undefined) {
+        if (!toner || !marca || cantidad === undefined) {
             return res.status(400).json({ message: 'El nombre y la cantidad son requeridos' })
         }
 
@@ -110,7 +110,7 @@ export const addToners = async (req, res) => {
             const updatedToner = await existingToner.save()
             res.status(200).json(updatedToner)
         } else {
-            const newToner = new Toners({ toner, cantidad })
+            const newToner = new Toners({ marca, toner, cantidad })
             const savedToner = await newToner.save()
             res.status(201).json(savedToner)
         }
@@ -185,6 +185,7 @@ export const addAllToners = async (req,res) => {
         const data = xlsx.utils.sheet_to_json(worksheet)
 
         const newToner = data.map((row) => ({
+            marca:row.Marca,
             toner:row.Toner,
             cantidad: row.Cantidad || 0
         }))
