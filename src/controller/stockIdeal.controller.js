@@ -6,6 +6,9 @@ import path from "path";
 import PDFDocument from 'pdfkit';
 import nodemailer from 'nodemailer';
 import { fileURLToPath } from 'url';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const createIdealStock = async (req, res) => {
     const file = req.file; 
@@ -99,6 +102,8 @@ export const enviarPedidoStock = async (req, res) => {
       };
     }).filter(order => order.Pedido > 0);
 
+    const passEmail = process.env.CONTRAMAIL
+
     const doc = new PDFDocument();
     const buffers = [];
     doc.on('data', buffers.push.bind(buffers));
@@ -109,7 +114,7 @@ export const enviarPedidoStock = async (req, res) => {
         service: 'gmail',
         auth: {
           user: 'gestiondetoner@gmail.com',
-          pass: 'r q y g z cm p e j b g q f l e'
+          pass: passEmail
         }
       });
 
