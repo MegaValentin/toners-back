@@ -7,9 +7,7 @@ const urlDB = process.env.MONGODB_URI;
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(urlDB, {
-      useUnifiedTopology: true
-    });
+    await mongoose.connect(urlDB);
     console.log("DB connected");
   } catch (error) {
     console.log(error);
