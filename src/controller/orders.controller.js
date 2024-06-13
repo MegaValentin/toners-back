@@ -8,6 +8,9 @@ import Order from "../models/orders.model.js";
 import Toners from "../models/toners.model.js";
 import Areas from "../models/areas.model.js";
 import AreaUsage from "../models/areaUsage.model.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const getOrders = async (req, res) => {
   try {
@@ -122,11 +125,13 @@ export const addOrders = async (req, res) => {
 
     doc.end()
 
+    const passEmail = process.env.CONTRAMAIL
+    
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth:{
         user:'gestiondetoner@gmail.com',
-        pass:'r q y g z cm p e j b g q f l e'
+        pass:passEmail
       }
     })
 
