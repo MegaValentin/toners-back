@@ -19,6 +19,9 @@ app.use('/api',officesRouter)
 app.use('/api',tonersRoutes)
 app.use('/api', ordersRoutes)
 app.use('/api', stockIdealRoutes)
+app.get('/', (req, res) => {
+    res.send('¡Hola, mundo! El servidor está funcionando correctamente.');
+  });
 
 
 
