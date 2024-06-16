@@ -5,11 +5,14 @@ import tonersRoutes from './routes/toners.routes.js';
 import ordersRoutes from './routes/orders.routes.js'
 import stockIdealRoutes from './routes/stockIdeal.routes.js'
 import cors from 'cors'
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express()
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.REACT_URL,
     credentials:true
 }))
 
