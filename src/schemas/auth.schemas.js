@@ -6,8 +6,8 @@ export const resgisterSchema  = z.object({
     }),
     password: z.string({
         required_error: 'Password is required'
-    }).min(6,{
-        message:'La contraseña debe ser por lo menos de 6 caracteres'
+    }).min(4,{
+        message:'La contraseña debe ser por lo menos de 4 caracteres'
     })
 })
 
@@ -18,7 +18,7 @@ export const loginSchema = z.object({
     }),
     password: z.string({
         required_error:' Password is required'
-    }).min(6, {
-        message: "la contraseña debe ser por lo menos de 6 caracteres"
+    }).min(4, {
+        message: "la contraseña debe ser por lo menos de 4 caracteres"
     })
 })

@@ -19,13 +19,13 @@ export const registerUser = async (req, res) => {
         const token = await createAccessToken({id: userSaved._id})
 
         res.cookie("token", token)
-        res.json({
+        res.status(201).json({
             id: userSaved._id,
             username: userSaved.username,
             role: userSaved.role
         })
 
-        res.status(201).json({message:'user registered successfully'})
+        
 
     }catch(error){
         res.status(400).json({error: error.message})

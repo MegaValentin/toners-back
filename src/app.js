@@ -21,7 +21,7 @@ app.use(cors({
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(cookieParser())
-app.use('/api', usersRouters)
+app.use('/api/auth', usersRouters)
 app.use('/api',officesRouter)
 app.use('/api',tonersRoutes)
 app.use('/api', ordersRoutes)
