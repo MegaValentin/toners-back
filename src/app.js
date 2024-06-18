@@ -8,7 +8,7 @@ import usersRouters from './routes/users.routes.js'
 import cors from 'cors'
 import dotenv from "dotenv";
 import cookieParser from 'cookie-parser';
-
+import secureRouter from './routes/secure.routes.js'
 dotenv.config();
 
 const app = express()
@@ -22,6 +22,7 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use(cookieParser())
 app.use('/api/auth', usersRouters)
+app.use('/api',secureRouter)
 app.use('/api',officesRouter)
 app.use('/api',tonersRoutes)
 app.use('/api', ordersRoutes)
