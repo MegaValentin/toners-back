@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { authRequired } from "../middleware/validator.token.js";
+import { verifyRole } from "../middleware/validator.role.js";
 import {
     getOffices,
     getOffice,
@@ -13,16 +15,16 @@ import multer from 'multer';
 const upload = multer({ dest: 'uploads/' });
 const router = Router()
 
-router.get('/offices', getOffices)
+router.get('/offices', authRequired, verifyRole(['admin']), getOffices)
 
-router.get('/office/:id', getOffice)
+router.get('/office/:id', authRequired, verifyRole(['admin']), getOffice)
 
-router.delete('/office/:id', deleteOffice)
+router.delete('/office/:id', authRequired, verifyRole(['admin']), deleteOffice)
 
-router.put('/office/:id', updatedOffice )
+router.put('/office/:id', authRequired, verifyRole(['admin']), updatedOffice )
 
-router.post('/addoffice',validateSchema(createAreaSchema), addOffice)
+router.post('/addoffice',validateSchema(createAreaSchema), authRequired, verifyRole(['admin']), addOffice)
 
-router.post('/addalloffice', upload.single('file'), addAllOfiice)
+router.post('/addalloffice', upload.single('file'), authRequired, verifyRole(['admin']), addAllOfiice)
 
 export default router
