@@ -15,7 +15,7 @@ import multer from 'multer';
 const upload = multer({ dest: 'uploads/' });
 const router = Router()
 
-router.get('/offices', authRequired, verifyRole(['admin']), getOffices)
+router.get('/offices', authRequired, verifyRole(['admin', 'empleado']), getOffices)
 
 router.get('/office/:id', authRequired, verifyRole(['admin']), getOffice)
 

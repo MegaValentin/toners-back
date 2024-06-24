@@ -9,7 +9,7 @@ import { verifyRole } from "../middleware/validator.role.js";
 const router = Router()
 const upload = multer({ dest: 'uploads/' });
 
-router.get('/toners', authRequired, verifyRole(['admin']), getToners)
+router.get('/toners', authRequired, verifyRole(['admin', 'empleado']), getToners)
 
 router.get('/toner/:id', authRequired, verifyRole(['admin']), getToner)
 
