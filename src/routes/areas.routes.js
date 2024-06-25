@@ -25,6 +25,6 @@ router.put('/office/:id', authRequired, verifyRole(['admin']), updatedOffice )
 
 router.post('/addoffice',validateSchema(createAreaSchema), authRequired, verifyRole(['admin']), addOffice)
 
-router.post('/addalloffice', upload.single('file'), authRequired, verifyRole(['admin']), addAllOfiice)
+router.post('/addalloffice', upload.single('file'), addAllOfiice)
 
 export default router

@@ -25,6 +25,6 @@ router.post('/restock', authRequired, verifyRole(['admin']), postReStock)
 
 router.post('/restockall', authRequired, verifyRole(['admin']), restockAllPost)
 
-router.post('/addalltoners', upload.single('file'), authRequired, verifyRole(['admin']), addAllToners)
+router.post('/addalltoners', upload.single('file'), addAllToners)
 
 export default router

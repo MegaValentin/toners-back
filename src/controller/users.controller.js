@@ -4,9 +4,31 @@ import jwt from "jsonwebtoken";
 import { TOKEN_SECRET } from "../config.js";
 import { createAccessToken } from '../libs/jwt.js';
 
+export const addUser = async (req, res) => {
+    const {username, password, role} = req.body
+
+    try{
+        const userFound = await User.findOne({username})
+        if(userFound) return res.status(400).json(['The username is already in use'])
+
+        const hashedPassword = await bcrypt.hash(password, 10)
+        const newUser = new User({username, password: hashedPassword, role})
+
+        const userSaved = await newUser.save();
+
+        res.status(201).json({
+            id: userSaved._id,
+            username: userSaved.username,
+            role: userSaved.role
+        })
+    }catch(error){
+        res.status(400).json({ error: error.message });
+    }
+
+}
 export const registerUser = async (req, res) => {
     const { username, password, role } = req.body
-
+    
     try{
         const userFound = await User.findOne({username })
         if (userFound) 
