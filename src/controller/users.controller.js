@@ -119,3 +119,32 @@ export const verifyToken = async (req, res) => {
         })
     })
 }
+export const getUser = async (req, res) => {
+    try {
+        const user = await User.find()
+        res.json(user)
+
+    } catch (error) {
+        return res.status(500).json({ message: "error al buscar los usuarios" })
+    }
+}
+
+export const deleteUser = async (req, res) => {
+    try {
+
+        const deleteUser = await User.findByIdAndDelete(req.params.id)
+        if (!deleteUser) return res.status(404).json({
+            message: "Usuario no encontrado"
+        })
+        res.json({
+            message: "Usuario eleminado exitosamente",
+            deleteUser
+        })
+
+    } catch (error) {
+        console.error('Error al eliminar usurio:', error)
+        res.status(500).json({
+            message: "Error al eliminar usuario"
+        })
+    }
+}
