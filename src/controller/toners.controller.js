@@ -1,4 +1,5 @@
 import Toners from "../models/toners.model.js"
+import StockIdeal from "../models/stockIdeal.model.js"
 import xlsx from 'xlsx';
 import fs from 'fs';
 
@@ -32,6 +33,34 @@ export const getToner = async (req, res) => {
         })
     }
 }
+
+export const lowTonerStock = async (req, res) => {
+    try {
+      const currentStock = await Toners.find({});
+      const idealStocks = await StockIdeal.find({});
+  
+      const stockCompare = idealStocks.map((ideal) => {
+        const current = currentStock.find(item => item.toner === ideal.toner)
+        const currentCantidad = current ? current.cantidad : 0
+        const idealThirtyPercent = Math.ceil(ideal.stockIdeal * 0.3)
+
+        return {
+          marca: ideal.marca,
+          toner: ideal.toner,
+          ideal: ideal.stockIdeal,
+          idealThirtyPercent: idealThirtyPercent,
+          current: currentCantidad,
+          
+        };
+      });
+  
+      const lowStockToners = stockCompare.filter(item => item.current <= item.idealThirtyPercent);
+  
+      res.status(200).json(lowStockToners);
+    } catch (error) {
+      res.status(500).json([{ error: error.message }]);
+    }
+};
 
 export const getLowToner = async (req,res) => {
     try {
