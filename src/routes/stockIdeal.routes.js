@@ -7,7 +7,7 @@ import { createIdealStock, getIdealStocks, checkDataExists, pedidoStock, enviarP
 const router = Router()
 const upload = multer({ dest: 'uploads/' });
 
-router.post('/addstockideal', upload.single('file'), authRequired, verifyRole(['admin']), createIdealStock)
+router.post('/addstockideal', upload.single('file'),  createIdealStock)
 router.get('/stockideal', authRequired, verifyRole(['admin']), getIdealStocks)
 router.get('/checkdata', authRequired, verifyRole(['admin']), checkDataExists)
 router.get('/pedidorecomendado', authRequired, verifyRole(['admin']), pedidoStock)
