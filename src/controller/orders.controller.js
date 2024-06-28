@@ -69,15 +69,29 @@ export const deliveryToner = async (req, res) => {
   try {
     const order = await Order.findById(id);
     if (order) {
-      order.isDelivered = true;
-      
-      await order.save();
-      res.status(200).json({ message: 'Order delivered', order });
+      const toner = await Toners.findById(order.toner);
+      if (toner) {
+        if (toner.cantidad < order.cantidad) {
+          return res.status(400).json({ message: 'No hay toner' });
+        }
+        toner.cantidad -= order.cantidad;
+        if (toner.stock < 0) {
+          toner.stock = 0; 
+        }
+        await toner.save(); 
+
+        order.isDelivered = true;
+        await order.save(); 
+
+        res.status(200).json({ message: 'Order delivered and stock updated', order });
+      } else {
+        res.status(404).json({ message: 'Toner not found' });
+      }
     } else {
       res.status(404).json({ message: 'Order not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Error updating order' });
+    res.status(500).json({ message: 'Error updating order and stock', error });
   }
 }
 
@@ -104,11 +118,7 @@ export const addOrders = async (req, res) => {
         message: "El area especificado no existe",
       });
     }
-    if (tonerExists.cantidad < cantidad) {
-      return res.status(400).json({
-        message: "cantidad insuficiente de toner",
-      });
-    }
+    
 
     const newOrder = new Order({
       toner,
