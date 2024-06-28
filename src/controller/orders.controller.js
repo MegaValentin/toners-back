@@ -63,9 +63,27 @@ export const deleteOrder = async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export const deliveryToner = async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const order = await Order.findById(id);
+    if (order) {
+      order.isDelivered = true;
+      
+      await order.save();
+      res.status(200).json({ message: 'Order delivered', order });
+    } else {
+      res.status(404).json({ message: 'Order not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating order' });
+  }
+}
+
 export const addOrders = async (req, res) => {
   try {
-    const { toner, cantidad, area, email } = req.body;
+    const { toner, cantidad, area } = req.body;
 
     if (!toner || !cantidad || !area) {
       return res.status(400).json({
@@ -104,14 +122,14 @@ export const addOrders = async (req, res) => {
 
     const savedOrder = await newOrder.save();
 
-    tonerExists.cantidad -= cantidad;
+    //tonerExists.cantidad -= cantidad;
     await tonerExists.save();
 
     const pdfPath = path.join(__dirname, `order-${savedOrder._id}.pdf`);
     const doc = new PDFDocument()
     doc.pipe(fs.createWriteStream(pdfPath))
 
-    doc.fontSize(25).text('Entrega de Toner', {align:'center'})
+    doc.fontSize(25).text('Entrega de Toner', { align: 'center' })
     doc.moveDown()
     doc.fontSize(14).text(`Fecha: ${new Date().toLocaleDateString()}`)
     doc.moveDown()
@@ -119,19 +137,19 @@ export const addOrders = async (req, res) => {
     doc.text(`Toner: ${tonerExists.toner}`)
     doc.text(`Cantidad: ${cantidad}`)
     doc.moveDown()
-    doc.text('Firma: ', {underline:true})
+    doc.text('Firma: ', { underline: true })
     doc.moveDown()
-    doc.text('Nombre y Apellido:', {underline:true})
+    doc.text('Nombre y Apellido:', { underline: true })
 
     doc.end()
 
     const passEmail = process.env.CONTRAMAIL
-    
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
-      auth:{
-        user:'gestiondetoner@gmail.com',
-        pass:passEmail
+      auth: {
+        user: 'gestiondetoner@gmail.com',
+        pass: passEmail
       }
     })
 
@@ -161,7 +179,7 @@ export const addOrders = async (req, res) => {
       }
       console.log('Email sent: ' + info.response);
     });
-   
+
 
     let areaUsage = await AreaUsage.findOne({ area });
     if (!areaUsage) {
@@ -219,14 +237,14 @@ export const createStock = async (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
-    
+
     for (const row of jsonData) {
       const { Toner, cantidad } = row;
       const newIdealStock = new stockIdeal({ toner: Toner, stockIdeal: cantidad });
       await newIdealStock.save();
     }
 
-    
+
     fs.unlinkSync(file.path);
 
     res.status(201).json({ message: 'Stock ideal creado desde el archivo Excel' });

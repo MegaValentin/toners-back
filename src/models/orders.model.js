@@ -29,6 +29,10 @@ const ordersSchema = new mongoose.Schema({
   fecha: {
     type: Date,
     default: Date.now
+  },
+  isDelivered:{
+    type: Boolean,
+    default: false
   }
 });
 
