@@ -9,6 +9,7 @@ import Toners from "../models/toners.model.js";
 import Areas from "../models/areas.model.js";
 import AreaUsage from "../models/areaUsage.model.js";
 import dotenv from "dotenv";
+import exceljs from 'exceljs';
 
 dotenv.config();
 
@@ -231,6 +232,130 @@ export const getAreaUsage = async (req, res) => {
     res.json(areaUsage);
   } catch (error) {
     return res.status(500).json({ message: "error al buscar las ordenes" });
+  }
+}
+
+export const getMonthlyReport = async (req, res) => {
+  const { month, year } = req.query;
+  const startDate = new Date(year, month - 1, 1);  // Primer día del mes
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999);  // Último día del mes
+  
+  try {
+    const areaUsage = await AreaUsage.aggregate([
+      {
+        $unwind: "$toners"
+      },
+      {
+        $match: {
+          "toners.fecha": {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { area: "$area", areaName: "areaName" },
+          toners: {
+            $push: {
+              toner: "$toners.tonerName",
+              totalTonners: "$toners.cantidad"
+            }
+          }
+        }
+      }
+    ]);
+
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet('Reporte Mensual');
+
+    worksheet.columns = [
+      { header: 'Área', key: 'areaName', width: 30 },
+      { header: 'Toner', key: 'toner', width: 30 },
+      { header: 'Cantidad', key: 'totalTonners', width: 20 }
+    ];
+
+    areaUsage.forEach((usage) => {
+      const { areaName, toners } = usage;
+      toners.forEach((toner) => {
+        worksheet.addRow({
+          areaName: areaName,
+          toner: toner.toner,
+          totalTonners: toner.totalTonners
+        });
+      });
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Reporte_Mensual.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (error) {
+    res.status(500).json({ message: "Error al generar el reporte mensual", error });
+  }
+};
+
+
+export const getYearlyReport = async (req, res) => {
+  const {year } = req.query
+  const startDate = new Date(year, 0, 1)
+  const endDate = new Date(year, 11, 31)
+
+  try {
+    const areaUsage = await AreaUsage.aggregate([
+      {
+        $unwind: "$toners"
+      },
+      {
+        $match: {
+          "toners.fecha": {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { area: "$area", areaName: "$areaName" },
+          toners: {
+            $push: {
+              toner: "$toners.tonerName",
+              totalTonners: "$toners.cantidad"
+            }
+          }
+        }
+      }
+    ]);
+
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet('Reporte Mensual');
+
+    worksheet.columns = [
+      { header: 'Área', key: 'areaName', width: 30 },
+      { header: 'Toner', key: 'toner', width: 30 },
+      { header: 'Cantidad', key: 'totalTonners', width: 20 }
+    ];
+
+    areaUsage.forEach((usage) => {
+      const { areaName, toners } = usage;
+      toners.forEach((toner) => {
+        worksheet.addRow({
+          areaName: areaName,
+          toner: toner.toner,
+          totalTonners: toner.totalTonners
+        });
+      });
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Reporte_Mensual.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    res.status(500).json({ message: "Error al generar el reporte anual", error });
   }
 }
 

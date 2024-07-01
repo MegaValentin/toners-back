@@ -27,7 +27,12 @@ const areaUsageSchema = new mongoose.Schema({
         required: true,
         min: 1
       }
-    }]
+    }],
+    fecha: {
+      type: Date,
+      default: Date.now
+    }
+    
     
   });
   
