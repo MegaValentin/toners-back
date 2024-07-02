@@ -10,6 +10,7 @@ import Areas from "../models/areas.model.js";
 import AreaUsage from "../models/areaUsage.model.js";
 import dotenv from "dotenv";
 import exceljs from 'exceljs';
+import { log } from 'console';
 
 dotenv.config();
 
@@ -237,31 +238,38 @@ export const getAreaUsage = async (req, res) => {
 
 export const getMonthlyReport = async (req, res) => {
   const { month, year } = req.query;
-  const startDate = new Date(year, month - 1, 1);  // Primer día del mes
-  const endDate = new Date(year, month, 0, 23, 59, 59, 999);  // Último día del mes
-  
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+console.log(endDate)
   try {
     const areaUsage = await AreaUsage.aggregate([
       {
-        $unwind: "$toners"
-      },
-      {
         $match: {
-          "toners.fecha": {
+          fecha: {
             $gte: startDate,
             $lte: endDate
           }
         }
       },
       {
+        $unwind: "$toners"
+      },
+      {
         $group: {
-          _id: { area: "$area", areaName: "areaName" },
+          _id: { area: "$area", areaName: "$areaName" },
           toners: {
             $push: {
               toner: "$toners.tonerName",
-              totalTonners: "$toners.cantidad"
+              cantidad: "$toners.cantidad"
             }
           }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          areaName: "$_id.areaName",
+          toners: 1
         }
       }
     ]);
@@ -272,7 +280,7 @@ export const getMonthlyReport = async (req, res) => {
     worksheet.columns = [
       { header: 'Área', key: 'areaName', width: 30 },
       { header: 'Toner', key: 'toner', width: 30 },
-      { header: 'Cantidad', key: 'totalTonners', width: 20 }
+      { header: 'Cantidad', key: 'cantidad', width: 20 }
     ];
 
     areaUsage.forEach((usage) => {
@@ -281,7 +289,7 @@ export const getMonthlyReport = async (req, res) => {
         worksheet.addRow({
           areaName: areaName,
           toner: toner.toner,
-          totalTonners: toner.totalTonners
+          cantidad: toner.cantidad
         });
       });
     });
@@ -306,15 +314,15 @@ export const getYearlyReport = async (req, res) => {
   try {
     const areaUsage = await AreaUsage.aggregate([
       {
-        $unwind: "$toners"
-      },
-      {
         $match: {
-          "toners.fecha": {
+          fecha: {
             $gte: startDate,
             $lte: endDate
           }
         }
+      },
+      {
+        $unwind: "$toners"
       },
       {
         $group: {
@@ -322,9 +330,16 @@ export const getYearlyReport = async (req, res) => {
           toners: {
             $push: {
               toner: "$toners.tonerName",
-              totalTonners: "$toners.cantidad"
+              cantidad: "$toners.cantidad"
             }
           }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          areaName: "$_id.areaName",
+          toners: 1
         }
       }
     ]);
@@ -335,7 +350,7 @@ export const getYearlyReport = async (req, res) => {
     worksheet.columns = [
       { header: 'Área', key: 'areaName', width: 30 },
       { header: 'Toner', key: 'toner', width: 30 },
-      { header: 'Cantidad', key: 'totalTonners', width: 20 }
+      { header: 'Cantidad', key: 'cantidad', width: 20 }
     ];
 
     areaUsage.forEach((usage) => {
@@ -344,7 +359,7 @@ export const getYearlyReport = async (req, res) => {
         worksheet.addRow({
           areaName: areaName,
           toner: toner.toner,
-          totalTonners: toner.totalTonners
+          cantidad: toner.cantidad
         });
       });
     });
