@@ -83,24 +83,30 @@ export const updatedOffice = async (req, res) =>{
     }
 }
 
-export const addOffice = async (req, res) =>{
-    try{
+export const addOffice = async (req, res) => {
+    try {
         const { area } = req.body;
-        
-        if(!area=== undefined){
-            return res.status(400).json({message: 'El nombre del area es requerido'})
+
+        if (area === undefined || area.trim() === '') {
+            return res.status(400).json({ message: 'El nombre del área es requerido' });
         }
 
-        const newOffice = new Areas({area})
-        const savedOffice = await newOffice.save()
+        const normalizedOffice = area.trim().toLowerCase();
+        const existingOffice = await Areas.findOne({ area: { $regex: `^${normalizedOffice}$`, $options: 'i' } });
 
-        res.status(201).json(savedOffice)
-
-    } catch(error){
-        console.log('Error al agregar la area', error)
-        res.status(500).json({message:'Error al agregar la area.'})
+        if (existingOffice) {
+            return res.status(400).json({ message: "Ya hay un área con este nombre" });
+        } else {
+            const newOffice = new Areas({ area: normalizedOffice });
+            const savedOffice = await newOffice.save();
+            return res.status(201).json(savedOffice);
+        }
+    } catch (error) {
+        console.error('Error al agregar el área', error);
+        return res.status(500).json({ message: 'Error al agregar el área.' });
     }
-}
+};
+
 
 export const addAllOfiice = async (req, res) => {
     const file = req.file
