@@ -11,5 +11,5 @@ router.post('/addstockideal', upload.single('file'),  createIdealStock)
 router.get('/stockideal', authRequired, verifyRole(['admin']), getIdealStocks)
 router.get('/checkdata', authRequired, verifyRole(['admin']), checkDataExists)
 router.get('/pedidorecomendado', authRequired, verifyRole(['admin']), pedidoStock)
-router.post('/sendorder', enviarPedidoStock)
+router.get('/sendorder', enviarPedidoStock)
 export default router
