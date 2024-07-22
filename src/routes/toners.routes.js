@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getToners, getToner,getLowToner, deleteToner, updatedToner, addToners, postReStock, restockAllPost, addAllToners, lowTonerStock} from "../controller/toners.controller.js";
+import { getToners, getToner,getLowToner, deleteToner, updatedToner, addToners, postReStock, restockAllPost, addAllToners, lowTonerStock, reportToners} from "../controller/toners.controller.js";
 import { createTonerSchema } from "../schemas/toners.schemas.js"
 import { validateSchema } from "../middleware/validator.middleware.js";
 import multer from 'multer';
@@ -28,5 +28,7 @@ router.post('/restockall', authRequired, verifyRole(['admin']), restockAllPost)
 router.post('/addalltoners', upload.single('file'), addAllToners)
 
 router.get('/lowstock', lowTonerStock)
+
+router.get('/report/toner', authRequired, verifyRole(['admin']), reportToners)
 
 export default router

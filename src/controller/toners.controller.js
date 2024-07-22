@@ -2,6 +2,7 @@ import Toners from "../models/toners.model.js"
 import StockIdeal from "../models/stockIdeal.model.js"
 import xlsx from 'xlsx';
 import fs from 'fs';
+import excelJS from 'exceljs';
 
 export const getToners = async (req, res) => {
     try {
@@ -231,3 +232,45 @@ export const addAllToners = async (req,res) => {
     }
 
 } 
+export const reportToners = async (req,res) => {
+    try {
+        const toners = await Toners.find();
+    
+        if (!toners || toners.length === 0) {
+          return res.status(404).json({ message: 'No toner data available' });
+        }
+    
+        const workbook = new excelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Current Stock Report');
+    
+        // Agregar encabezados
+        worksheet.columns = [
+         
+          { header: 'Marca', key: 'marca', width: 25 },
+          { header: 'Toner', key: 'toner', width: 25 },
+          { header: 'Stock', key: 'cantidad', width: 25 },
+        ];
+    
+        // Agregar filas de datos
+        toners.forEach((toner) => {
+          worksheet.addRow({
+            marca: toner.marca,
+            toner: toner.toner,
+            cantidad: toner.cantidad,
+          });
+        });
+    
+        // Configurar el archivo para su descarga
+        res.setHeader(
+          'Content-Type',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        res.setHeader('Content-Disposition', 'attachment; filename=current_stock_report.xlsx');
+    
+        await workbook.xlsx.write(res);
+        res.status(200).end();
+      } catch (error) {
+        console.error('Error generating current stock report:', error);
+        res.status(500).json({ message: 'Error generating current stock report' });
+      }
+}
