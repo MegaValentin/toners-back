@@ -85,6 +85,30 @@ export const deliveryToner = async (req, res) => {
         order.isDelivered = true;
         await order.save(); 
 
+        let areaUsage = await AreaUsage.findOne({ area: order.area });
+        if (!areaUsage) {
+          areaUsage = new AreaUsage({
+            area: order.area,
+            areaName: order.areaName,
+            toners: [],
+          });
+        }
+
+        const tonerUsageIndex = areaUsage.toners.findIndex((t) =>
+          t.toner.equals(order.toner)
+        );
+        if (tonerUsageIndex !== -1) {
+          areaUsage.toners[tonerUsageIndex].cantidad += order.cantidad;
+        } else {
+          areaUsage.toners.push({
+            toner: order.toner,
+            tonerName: toner.toner,
+            cantidad: order.cantidad,
+          });
+        }
+
+        await areaUsage.save();
+
         res.status(200).json({ message: 'Order delivered and stock updated', order });
       } else {
         res.status(404).json({ message: 'Toner not found' });
@@ -134,88 +158,8 @@ export const addOrders = async (req, res) => {
 
     const savedOrder = await newOrder.save();
 
-    //tonerExists.cantidad -= cantidad;
+    
     await tonerExists.save();
-
-    const pdfPath = path.join(__dirname, `order-${savedOrder._id}.pdf`);
-    const doc = new PDFDocument()
-    doc.pipe(fs.createWriteStream(pdfPath))
-
-    doc.fontSize(25).text('Entrega de Toner', { align: 'center' })
-    doc.moveDown()
-    doc.fontSize(14).text(`Fecha: ${new Date().toLocaleDateString()}`)
-    doc.moveDown()
-    doc.text(`Area: ${areaExists.area}`)
-    doc.text(`Toner: ${tonerExists.toner}`)
-    doc.text(`Cantidad: ${cantidad}`)
-    doc.moveDown()
-    doc.text('Firma: ', { underline: true })
-    doc.moveDown()
-    doc.text('Nombre y Apellido:', { underline: true })
-
-    doc.end()
-
-    const passEmail = process.env.CONTRAMAIL
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'gestiondetoner@gmail.com',
-        pass: passEmail
-      }
-    })
-
-    const mailOptions = {
-      from: 'gestiondetoner@gmail.com',
-      to: 'gestiontoner@bolivar.gob.ar',
-      subject: 'Confirmación de Entrega de Tóner',
-      text: `Adjunto encontrará el PDF con los detalles de la entrega del ${tonerExists.toner} para ${areaExists.area}.`,
-      attachments: [
-        {
-          filename: `order-${savedOrder._id}.pdf`,
-          path: pdfPath,
-        },
-      ],
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      fs.unlink(pdfPath, (err) => {
-        if (err) {
-          console.error('Error al eliminar el archivo PDF:', err);
-        } else {
-          console.log('Archivo PDF eliminado:', pdfPath);
-        }
-      })
-      if (error) {
-        return console.log(error);
-      }
-      console.log('Email sent: ' + info.response);
-    });
-
-
-    let areaUsage = await AreaUsage.findOne({ area });
-    if (!areaUsage) {
-      areaUsage = new AreaUsage({
-        area,
-        areaName: areaExists.area,
-        toners: [],
-      });
-    }
-
-    const tonerUsageIndex = areaUsage.toners.findIndex((t) =>
-      t.toner.equals(toner)
-    );
-    if (tonerUsageIndex !== -1) {
-      areaUsage.toners[tonerUsageIndex].cantidad += cantidad;
-    } else {
-      areaUsage.toners.push({
-        toner,
-        tonerName: tonerExists.toner,
-        cantidad,
-      });
-    }
-
-    await areaUsage.save();
 
     res.status(201).json(savedOrder);
   } catch (error) {
