@@ -170,6 +170,52 @@ export const addOrders = async (req, res) => {
   }
 };
 
+export const cancelOrder = async (req, res) => {
+  const {id} = req.params
+
+  try {
+    const order = await Order.findById(id)
+
+    if(!order){
+      return res.status(404).json({message: 'Order not found'})
+    }
+
+    if(!order.isDelivered){
+      return res.status(400).json({message: 'Order is not delivered, so it cannot be canceled'})
+    }
+
+    const toner = await Toners.findById(order.toner)
+    if(!toner){
+      return res.status(404).json({message: 'Toner not found'})
+    }
+
+    toner.cantidad += order.cantidad
+    await toner.save()
+
+    let areaUsage = await AreaUsage.findOne({area: order.area})
+    if(areaUsage){
+      const tonerUsageIndex = areaUsage.toners.findIndex((t)=>
+      t.toner.equals(order.toner))
+
+      if(tonerUsageIndex !== -1) {
+        areaUsage.toners[tonerUsageIndex].cantidad -= order.cantidad;
+        if (areaUsage.toners[tonerUsageIndex].cantidad <= 0) {
+          areaUsage.toners.splice(tonerUsageIndex, 1);
+        }
+      }
+
+      await areaUsage.save();
+
+    order.isDelivered = false;
+    await order.save();
+
+    res.status(200).json({ message: 'Order canceled and stock updated', order });
+    }
+  } catch (error) {
+    console.error('Error canceling order and updating stock', error);
+    res.status(500).json({ message: 'Error canceling order and updating stock', error });
+  }
+}
 
 export const getAreaUsage = async (req, res) => {
   try {

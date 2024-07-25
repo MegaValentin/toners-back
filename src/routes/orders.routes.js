@@ -8,7 +8,8 @@ import { getOrders,
     getAreaUsage,
     deliveryToner, 
     getMonthlyReport,
-    getYearlyReport} from "../controller/orders.controller.js";
+    getYearlyReport,
+    cancelOrder} from "../controller/orders.controller.js";
 
 const router = Router()
 
@@ -27,5 +28,7 @@ router.put('/orders/:id/deliver',authRequired, verifyRole(['admin', 'empleado'])
 router.get('/report/monthly', authRequired, verifyRole(['admin']),getMonthlyReport)
 
 router.get('/report/yearly', authRequired, verifyRole(['admin']), getYearlyReport)
+
+router.post('/cancel/:id', authRequired, verifyRole(['admin']), cancelOrder)
 
 export default router

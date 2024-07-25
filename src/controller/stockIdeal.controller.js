@@ -84,68 +84,7 @@ export const pedidoStock = async (req, res) => {
     res.status(500).json([{ error: error.message }]);
   }
 };
-
-/*export const enviarPedidoStock = async (req, res) => {
-  try {
-    const stockIdeal = await StockIdeal.find();
-    const stockActual = await Toners.find();
-
-    const recommendedOrder = stockIdeal.map(ideal => {
-      const actual = stockActual.find(a => a.toner === ideal.toner) || { Cantidad: 0 };
-      const currentCantidad = actual ? actual.cantidad : 0
-      const pedido = ideal.stockIdeal  - currentCantidad
-      return {
-        Marca: ideal.marca,
-        Toner: ideal.toner,
-        Pedido: pedido
-      };
-    }).filter(order => order.Pedido > 0);
-
-    const passEmail = process.env.CONTRAMAIL
-
-    const doc = new PDFDocument();
-    const buffers = [];
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', async () => {
-      const pdfData = Buffer.concat(buffers);
-
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'gestiondetoner@gmail.com',
-          pass: passEmail
-        }
-      });
-
-      const mailOptions = {
-        from: 'gestiondetoner@gmail.com',
-        to: 'gestiontoner@bolivar.gob.ar',
-        subject: 'Pedido Recomendado',
-        text: 'Adjunto el pedido recomendado en formato PDF.',
-        attachments: [
-          {
-            filename: 'pedido-recomendado.pdf',
-            content: pdfData
-          }
-        ]
-      };
-
-      await transporter.sendMail(mailOptions);
-      res.status(200).send('Correo enviado correctamente.');
-    });
-
-    doc.fontSize(12).text('Pedido Recomendado:', { underline: true });
-    recommendedOrder.forEach(order => {
-      doc.text(`${order.Marca} ${order.Toner} ........ ${order.Pedido}`);
-    });
-
-    doc.end();
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error en el servidor.');
-  }
-}*/
-
+ 
 export const enviarPedidoStock = async (req, res) => {
   try {
     const stockIdeal = await StockIdeal.find();
