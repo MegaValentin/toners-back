@@ -65,6 +65,27 @@ export const deleteOrder = async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export const removeUndeliveredOrder = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (order.isDelivered) {
+      return res.status(400).json({ message: 'Delivered orders cannot be deleted' });
+    }
+
+    await Order.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Undelivered order deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting undelivered order', error);
+    res.status(500).json({ message: 'Error deleting undelivered order', error });
+  }
+};
+
 export const deliveryToner = async (req, res) => {
   const { id } = req.params;
   
