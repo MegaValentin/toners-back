@@ -251,11 +251,12 @@ export const getMonthlyReport = async (req, res) => {
   const { month, year } = req.query;
   const startDate = new Date(year, month - 1, 1);
   const endDate = new Date(year, month, 0, 23, 59, 59, 999);
-console.log(endDate)
+
   try {
-    const areaUsage = await AreaUsage.aggregate([
+    const orders = await Order.aggregate([
       {
         $match: {
+          isDelivered: true, // Solo tomar en cuenta las órdenes entregadas
           fecha: {
             $gte: startDate,
             $lte: endDate
@@ -263,15 +264,18 @@ console.log(endDate)
         }
       },
       {
-        $unwind: "$toners"
+        $group: {
+          _id: { area: "$areaName", toner: "$tonerName" },
+          totalCantidad: { $sum: "$cantidad" }
+        }
       },
       {
         $group: {
-          _id: { area: "$area", areaName: "$areaName" },
+          _id: "$_id.area",
           toners: {
             $push: {
-              toner: "$toners.tonerName",
-              cantidad: "$toners.cantidad"
+              toner: "$_id.toner",
+              cantidad: "$totalCantidad"
             }
           }
         }
@@ -279,7 +283,7 @@ console.log(endDate)
       {
         $project: {
           _id: 0,
-          areaName: "$_id.areaName",
+          areaName: "$_id",
           toners: 1
         }
       }
@@ -294,8 +298,8 @@ console.log(endDate)
       { header: 'Cantidad', key: 'cantidad', width: 20 }
     ];
 
-    areaUsage.forEach((usage) => {
-      const { areaName, toners } = usage;
+    orders.forEach((order) => {
+      const { areaName, toners } = order;
       toners.forEach((toner) => {
         worksheet.addRow({
           areaName: areaName,
@@ -314,7 +318,7 @@ console.log(endDate)
   } catch (error) {
     res.status(500).json({ message: "Error al generar el reporte mensual", error });
   }
-};
+}
 
 
 export const getYearlyReport = async (req, res) => {
