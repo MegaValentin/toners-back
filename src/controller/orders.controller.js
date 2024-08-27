@@ -1,5 +1,3 @@
-import PDFDocument from 'pdfkit';
-import nodemailer from 'nodemailer';
 import fs from 'fs';
 import xlsx from 'xlsx';
 import path from 'path';
@@ -10,7 +8,6 @@ import Areas from "../models/areas.model.js";
 import AreaUsage from "../models/areaUsage.model.js";
 import dotenv from "dotenv";
 import exceljs from 'exceljs';
-import { log } from 'console';
 
 dotenv.config();
 

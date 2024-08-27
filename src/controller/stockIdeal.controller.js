@@ -98,7 +98,8 @@ export const enviarPedidoStock = async (req, res) => {
         Marca: ideal.marca,
         Toner: ideal.toner,
         Pedido: pedido,
-        Cantidad: actual.cantidad
+        Cantidad: actual.cantidad,
+        StockIdeal: ideal.stockIdeal
       };
     }).filter(order => order.Pedido > 0);
 
@@ -110,8 +111,10 @@ export const enviarPedidoStock = async (req, res) => {
     worksheet.columns = [
       { header: 'Marca', key: 'Marca', width: 20 },
       { header: 'Toner', key: 'Toner', width: 20 },
-      { header: 'Pedido', key: 'Pedido', width: 10 },
+      { header: 'Pedido', key: 'Pedido', width: 20 },
       { header: 'Stock', key: 'Cantidad', width:20},
+      { header: 'StockIdeal', key: 'StockIdeal', width:20},
+
     ];
 
     
