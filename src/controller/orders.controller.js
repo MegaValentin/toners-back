@@ -414,3 +414,54 @@ export const createStock = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+export const generateOrdersReport = async (req, res) => {
+  try {
+    
+    const orders = await Order.find().sort({ fecha: -1 });
+
+    
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet('Reporte de Órdenes');
+
+    
+    worksheet.columns = [
+      { header: 'Fecha', key: 'fecha', width: 20 },
+      { header: 'Área', key: 'areaName', width: 30 },
+      { header: 'Toner', key: 'tonerName', width: 30 },
+      { header: 'Cantidad', key: 'cantidad', width: 10 },
+      { header: 'Estado', key: 'isDelivered', width: 15 },
+    ];
+
+    
+    orders.forEach((order) => {
+      const formattedDate = new Date(order.fecha).toLocaleDateString()
+      worksheet.addRow({
+        fecha: formattedDate,
+        areaName: order.areaName,
+        tonerName: order.tonerName,
+        cantidad: order.cantidad,
+        isDelivered: order.isDelivered ? 'Entregado' : 'No Entregado',
+      });
+    });
+
+    
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=Reporte_Ordenes.xlsx'
+    );
+
+    
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error('Error generating orders report:', error);
+    res
+      .status(500)
+      .json({ message: 'Error generating orders report', error });
+  }
+};

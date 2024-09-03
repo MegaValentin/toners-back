@@ -9,6 +9,7 @@ import { getOrders,
     deliveryToner, 
     getMonthlyReport,
     getYearlyReport,
+    generateOrdersReport,
     cancelOrder,
     removeUndeliveredOrder} from "../controller/orders.controller.js";
 
@@ -33,5 +34,7 @@ router.get('/report/yearly', authRequired, verifyRole(['admin']), getYearlyRepor
 router.post('/cancel/:id', authRequired, verifyRole(['admin']), cancelOrder)
 
 router.delete('/remove/:id', authRequired, verifyRole(['admin']), removeUndeliveredOrder)
+
+router.get('/orders/report', authRequired, verifyRole(['admin']), generateOrdersReport)
 
 export default router
