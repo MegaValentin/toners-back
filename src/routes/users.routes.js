@@ -12,8 +12,8 @@ router.post("/login", validateSchema(loginSchema), login)
 router.post("/logout", logout)
 router.get("/profile", authRequired , profile);
 router.get("/verify", verifyToken);
-router.post("/adduser", validateSchema(resgisterSchema), authRequired, verifyRole(['admin']), addUser)
-router.get("/getuser", authRequired, verifyRole(['admin']), getUser)
-router.delete("/deleteuser/:id", authRequired, verifyRole(['admin']), deleteUser)
+router.post("/adduser", validateSchema(resgisterSchema), authRequired, verifyRole(['superadmin']), addUser)
+router.get("/getuser", authRequired, verifyRole(['superadmin']), getUser)
+router.delete("/deleteuser/:id", authRequired, verifyRole(['superadmin']), deleteUser)
 
 export default router
