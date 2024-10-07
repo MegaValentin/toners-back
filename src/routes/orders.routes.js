@@ -15,26 +15,26 @@ import { getOrders,
 
 const router = Router()
 
-router.get('/orders', authRequired, verifyRole(['admin', 'empleado']), getOrders)
+router.get('/orders', authRequired, verifyRole(['admin', 'empleado','superadmin']), getOrders)
 
-router.get('/order/:id',authRequired, verifyRole(['admin']), getOrder)
+router.get('/order/:id',authRequired, verifyRole(['admin','superadmin']), getOrder)
 
-router.get('/history', authRequired, verifyRole(['admin']), getAreaUsage)
+router.get('/history', authRequired, verifyRole(['admin','superadmin']), getAreaUsage)
 
-router.delete('/order/:id',authRequired, verifyRole(['admin']), deleteOrder)
+router.delete('/order/:id',authRequired, verifyRole(['admin','superadmin']), deleteOrder)
 
-router.post('/addorders', authRequired, verifyRole(['admin', 'empleado']),  addOrders)
+router.post('/addorders', authRequired, verifyRole(['admin', 'empleado','superadmin']),  addOrders)
 
-router.put('/orders/:id/deliver',authRequired, verifyRole(['admin', 'empleado']), deliveryToner)
+router.put('/orders/:id/deliver',authRequired, verifyRole(['admin', 'empleado','superadmin']), deliveryToner)
 
-router.get('/report/monthly', authRequired, verifyRole(['admin']),getMonthlyReport)
+router.get('/report/monthly', authRequired, verifyRole(['admin','superadmin']),getMonthlyReport)
 
-router.get('/report/yearly', authRequired, verifyRole(['admin']), getYearlyReport)
+router.get('/report/yearly', authRequired, verifyRole(['admin','superadmin']), getYearlyReport)
 
-router.post('/cancel/:id', authRequired, verifyRole(['admin']), cancelOrder)
+router.post('/cancel/:id', authRequired, verifyRole(['admin','superadmin']), cancelOrder)
 
-router.delete('/remove/:id', authRequired, verifyRole(['admin']), removeUndeliveredOrder)
+router.delete('/remove/:id', authRequired, verifyRole(['admin','superadmin']), removeUndeliveredOrder)
 
-router.get('/orders/report', authRequired, verifyRole(['admin']), generateOrdersReport)
+router.get('/orders/report', authRequired, verifyRole(['admin','superadmin']), generateOrdersReport)
 
 export default router

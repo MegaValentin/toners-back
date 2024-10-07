@@ -15,15 +15,15 @@ import multer from 'multer';
 const upload = multer({ dest: 'uploads/' });
 const router = Router()
 
-router.get('/offices', authRequired, verifyRole(['admin', 'empleado']), getOffices)
+router.get('/offices', authRequired, verifyRole(['admin', 'empleado','superadmin']), getOffices)
 
-router.get('/office/:id', authRequired, verifyRole(['admin']), getOffice)
+router.get('/office/:id', authRequired, verifyRole(['admin','superadmin']), getOffice)
 
-router.delete('/office/:id', authRequired, verifyRole(['admin']), deleteOffice)
+router.delete('/office/:id', authRequired, verifyRole(['admin','superadmin']), deleteOffice)
 
-router.put('/office/:id', authRequired, verifyRole(['admin']), updatedOffice )
+router.put('/office/:id', authRequired, verifyRole(['admin','superadmin']), updatedOffice )
 
-router.post('/addoffice',validateSchema(createAreaSchema), authRequired, verifyRole(['admin']), addOffice)
+router.post('/addoffice',validateSchema(createAreaSchema), authRequired, verifyRole(['admin','superadmin']), addOffice)
 
 router.post('/addalloffice', upload.single('file'), addAllOfiice)
 

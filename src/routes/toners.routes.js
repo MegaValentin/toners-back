@@ -9,26 +9,26 @@ import { verifyRole } from "../middleware/validator.role.js";
 const router = Router()
 const upload = multer({ dest: 'uploads/' });
 
-router.get('/toners', authRequired, verifyRole(['admin', 'empleado']), getToners)
+router.get('/toners', authRequired, verifyRole(['admin','superadmin', 'empleado']), getToners)
 
-router.get('/toner/:id', authRequired, verifyRole(['admin']), getToner)
+router.get('/toner/:id', authRequired, verifyRole(['admin','superadmin']), getToner)
 
-router.get('/low-toner', authRequired, verifyRole(['admin']), lowTonerStock)
+router.get('/low-toner', authRequired, verifyRole(['admin','superadmin']), lowTonerStock)
 
-router.delete('/toner/:id', authRequired, verifyRole(['admin']), deleteToner)
+router.delete('/toner/:id', authRequired, verifyRole(['admin','superadmin']), deleteToner)
 
-router.put('/toner/:id', authRequired, verifyRole(['admin']), updatedToner )
+router.put('/toner/:id', authRequired, verifyRole(['admin','superadmin']), updatedToner )
 
-router.post('/addtoners',validateSchema(createTonerSchema), authRequired, verifyRole(['admin']), addToners)
+router.post('/addtoners',validateSchema(createTonerSchema), authRequired, verifyRole(['admin','superadmin']), addToners)
 
-router.post('/restock', authRequired, verifyRole(['admin']), postReStock)
+router.post('/restock', authRequired, verifyRole(['admin','superadmin']), postReStock)
 
-router.post('/restockall', authRequired, verifyRole(['admin']), restockAllPost)
+router.post('/restockall', authRequired, verifyRole(['admin','superadmin']), restockAllPost)
 
 router.post('/addalltoners', upload.single('file'), addAllToners)
 
 router.get('/lowstock', lowTonerStock)
 
-router.get('/report/toner', authRequired, verifyRole(['admin']), reportToners)
+router.get('/report/toner', authRequired, verifyRole(['admin','superadmin']), reportToners)
 
 export default router
