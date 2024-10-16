@@ -46,36 +46,42 @@ export const addTask = async (req, res) => {
     }
 
 }
-export const assingTask = async (req, res) => {
+export const assignTask = async (req, res) => {
     try {
-        const { id } = req.params
-        const { username} = req.body
+        const { id } = req.params;
+        const { username } = req.body;
+        
+        const userLoggedIn = req.user;
 
-        const usuario = await User.findOne({ username })
-        if(!usuario || (usuario.role !== 'admin' && usuario.role !== "superadmin")){
-            return res.status(403).json({error: "Permiso denegado. El usuario debe ser 'admin' o 'superadmin'"})
-
+        if (!userLoggedIn || (userLoggedIn.role !== 'admin' && userLoggedIn.role !== 'superadmin')) {
+            return res.status(403).json({ error: "Permiso denegado. El usuario debe ser 'admin' o 'superadmin'" });
         }
 
+        
+        const usuario = await User.findOne({ username });
+        if (!usuario) {
+            return res.status(404).json({ error: "Usuario al que se va a asignar no encontrado" });
+        }
+        
+        // Asignamos la tarea al usuario especificado en el body
         const task = await TodoList.findByIdAndUpdate(
             id,
-            { usuarioAsignado: username, estado:"en proceso"},
-            { new: true}
+            { usuarioAsignado: username, estado: "en proceso" },
+            { new: true }
+        );
 
-        )
-
-        if(!task){
-            return res.status(404).json({error: "Tarea no encontrada"})
-
+        if (!task) {
+            return res.status(404).json({ error: "Tarea no encontrada" });
         }
 
-        res.json(task)
+        res.json(task);
 
     } catch (error) {
-        res.status(500).json({error: error.message})
+        console.error(error);
+        res.status(500).json({ error: error.message });
     }
+};
 
-}
 export const deleteTask = async (req, res) => {
     
 }
