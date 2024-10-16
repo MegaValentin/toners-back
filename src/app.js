@@ -5,6 +5,7 @@ import tonersRoutes from './routes/toners.routes.js';
 import ordersRoutes from './routes/orders.routes.js'
 import stockIdealRoutes from './routes/stockIdeal.routes.js'
 import usersRouters from './routes/users.routes.js'
+import todolistRoutes from './routes/todolist.routes.js' 
 import cors from 'cors'
 import dotenv from "dotenv";
 import cookieParser from 'cookie-parser';
@@ -27,6 +28,7 @@ app.use('/api',officesRouter)
 app.use('/api',tonersRoutes)
 app.use('/api', ordersRoutes)
 app.use('/api', stockIdealRoutes)
+app.use('/api', todolistRoutes)
 
 
 
