@@ -83,5 +83,21 @@ export const assignTask = async (req, res) => {
 };
 
 export const deleteTask = async (req, res) => {
-    
+    try {
+        const deleteTask = await TodoList.findByIdAndDelete(req.params.id)
+        
+        if(!deleteTask) return res.status(404).json({
+            message: "Tarea no encontrada"
+        })
+        res.json({
+            message:"Tarea eliminada exitosamente",
+            deleteTask
+        })
+
+    } catch (error) {
+        console.error('Error al eliminar la tarea:', error)
+        res.status(500).json({
+            message:"Error al eliminar la tarea"
+        })
+    }
 }
