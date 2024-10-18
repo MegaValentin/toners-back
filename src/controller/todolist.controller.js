@@ -51,6 +51,8 @@ export const assignTask = async (req, res) => {
         const { id } = req.params;
         const { username } = req.body;
         
+        console.log("Username recibido:", username);
+        
         const userLoggedIn = req.user;
 
         if (!userLoggedIn || (userLoggedIn.role !== 'admin' && userLoggedIn.role !== 'superadmin')) {

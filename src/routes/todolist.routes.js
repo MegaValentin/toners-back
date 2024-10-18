@@ -13,6 +13,6 @@ router.post('/addtask',authRequired, verifyRole(['admin','superadmin']), addTask
 
 router.delete('/task/:id',authRequired, verifyRole(['admin','superadmin']), deleteTask )
 
-router.put('/task/:id/assing',authRequired, verifyRole(['admin','superadmin']), assignTask)
+router.put('/task/:id/assign',authRequired, verifyRole(['admin','superadmin']), assignTask)
 
 export default router
