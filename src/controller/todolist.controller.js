@@ -103,3 +103,37 @@ export const deleteTask = async (req, res) => {
         })
     }
 }
+
+export const getMyTasks = async (req, res) => {
+    try {
+        const userLoggedIn = req.user 
+        const tasks = await TodoList.find({usuarioAsignado: userLoggedIn.username, estado: "en proceso"})
+        res.json(tasks) 
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({error: error.message})     
+    }
+} 
+
+export const completeTask = async (req, res) => {
+    try {
+        const { id } = req.params 
+        const { solucionDescripcion } = req.body
+
+        const task = await TodoList.findByIdAndUpdate(
+            id,
+            { estado: "finalizado", solucionDescripcion },
+            { new: true}
+        )
+        
+        if(!task){
+            return res.status(404).json({error: "Tarea no encontrada"})
+        }
+
+        res.json(task)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({error:error.message})
+    }
+}
