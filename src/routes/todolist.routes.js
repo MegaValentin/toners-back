@@ -15,7 +15,7 @@ router.delete('/task/:id',authRequired, verifyRole(['admin','superadmin']), dele
 
 router.put('/task/:id/assign',authRequired, verifyRole(['admin','superadmin']), assignTask)
 
-router.put('/task/:id/complete', authRequired, completeTask)
+router.put('/task/:id/complete', completeTask)
 
 router.get('/mytasks', authRequired, getMyTasks)
 

@@ -107,7 +107,10 @@ export const deleteTask = async (req, res) => {
 export const getMyTasks = async (req, res) => {
     try {
         const userLoggedIn = req.user 
-        const tasks = await TodoList.find({usuarioAsignado: userLoggedIn.username, estado: "en proceso"})
+        const tasks = await TodoList.find({
+            usuarioAsignado: userLoggedIn.username,
+            estado: { $in: ["en proceso", "finalizado"] }
+        })
         res.json(tasks) 
 
     } catch (error) {
