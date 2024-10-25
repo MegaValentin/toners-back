@@ -140,3 +140,26 @@ export const completeTask = async (req, res) => {
         res.status(500).json({error:error.message})
     }
 }
+
+export const revertTask = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const task = await TodoList.findById(id);
+        if (!task) {
+            return res.status(404).json({ error: "Tarea no encontrada" });
+        }
+        if (task.estado !== "en proceso") {
+            return res.status(400).json({ error: "La tarea no está en estado 'en proceso'" });
+        }
+
+    
+        task.estado = "pendiente";
+        await task.save();
+
+        res.json({ message: "El estado de la tarea ha sido revertido a 'pendiente'", task });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+}
