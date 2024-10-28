@@ -28,16 +28,13 @@ const todolistSchema = new mongoose.Schema({
 });
 
 todolistSchema.pre("save", async function (next) {
-  
-  if (this.usuarioAsignado) {
+  // Validación solo si `usuarioAsignado` es modificado
+  if (this.isModified("usuarioAsignado") && this.usuarioAsignado) {
     const usuario = await User.findOne({ username: this.usuarioAsignado });
 
-    
     if (!usuario || (usuario.role !== "admin" && usuario.role !== "superadmin")) {
       return next(new Error("El usuario asignado debe tener rol 'admin' o 'superadmin'"));
     }
-
-    
     if (this.estado !== "finalizado") {
       this.estado = "en proceso"; 
     }

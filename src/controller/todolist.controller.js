@@ -145,21 +145,26 @@ export const revertTask = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Verificar la existencia y el estado actual de la tarea
         const task = await TodoList.findById(id);
         if (!task) {
             return res.status(404).json({ error: "Tarea no encontrada" });
         }
         if (task.estado !== "en proceso") {
-            return res.status(400).json({ error: "La tarea no está en estado 'en proceso'" });
+            return res.status(400).json({ error: "La tarea no está en el estado 'en proceso'" });
         }
 
-    
+        // Actualizar el estado y eliminar el usuario asignado
         task.estado = "pendiente";
+        task.usuarioAsignado = null;
         await task.save();
 
-        res.json({ message: "El estado de la tarea ha sido revertido a 'pendiente'", task });
+        res.json({
+            message: "El estado de la tarea ha sido revertido a 'pendiente' y el usuario asignado ha sido eliminado",
+            task,
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+        console.error("Error en revertTask:", error);
+        res.status(500).json({ error: "Error interno del servidor al intentar revertir la tarea." });
     }
-}
+};

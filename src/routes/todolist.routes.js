@@ -19,6 +19,6 @@ router.put('/task/:id/complete', completeTask)
 
 router.get('/mytasks', authRequired, getMyTasks)
 
-router.put('/task/:id/revert', authRequired, verifyRole(['admin', 'superadmin']), revertTask)
+router.put('/task/:id/revert',  revertTask)
 
 export default router
