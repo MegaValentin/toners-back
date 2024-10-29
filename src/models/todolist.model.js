@@ -57,17 +57,26 @@ todolistSchema.pre("save", async function (next) {
 todolistSchema.pre("findOneAndUpdate", async function (next) {
   const update = this.getUpdate();
   
-  if (update.estado === "en proceso" && !this.get("fechaInicio")) {
-    update.fechaInicio = new Date();
-  }
-  
-  if (update.estado === "finalizado" && !this.get("fechaFinalizacion")) {
-    update.fechaFinalizacion = new Date();
-  }
-  
-  if (update.estado === "pendiente") {
-    update.fechaInicio = null;
-    update.fechaFinalizacion = null;
+  switch (update.estado) {
+    case "en proceso":
+      if (!this.get("fechaInicio")) {
+        update.fechaInicio = new Date();
+      }
+      break;
+      
+    case "finalizado":
+      if (!this.get("fechaFinalizacion")) {
+        update.fechaFinalizacion = new Date();
+      }
+      break;
+      
+    case "pendiente":
+      update.fechaInicio = null;
+      update.fechaFinalizacion = null;
+      break;
+      
+    default:
+      break;
   }
 
   next();
