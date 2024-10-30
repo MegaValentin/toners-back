@@ -1,10 +1,21 @@
 import mongoose from "mongoose";
 import User from "./users.model.js"
 
+const { Schema } = mongoose;
+
 const todolistSchema = new mongoose.Schema({
   titulo: {
     type: String,
     required: true,
+  },
+  area: {
+    type: Schema.Types.ObjectId,
+    ref: 'Area',
+    required: true
+  },
+  areaName:{
+    type:String,
+    required:true
   },
   descripcion: {
     type: String,

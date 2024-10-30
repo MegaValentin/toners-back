@@ -1,5 +1,6 @@
 import TodoList from  "../models/todolist.model.js"
 import User from '../models/users.model.js';
+import Areas from "../models/areas.model.js";
 
 export const getTasks = async (req, res) => {
     try {
@@ -29,11 +30,27 @@ export const getTask = async (req, res) => {
 }
 export const addTask = async (req, res) => {
     try {
-        const { titulo, descripcion } = req.body
+        const { titulo, descripcion, area } = req.body
+
+        if(!titulo || !descripcion || !area ){
+            return res.status(400).json({
+                message: "Los campos 'titulo', 'descripcion' y 'area' son necesarios"
+            })
+        }
+
+        const areaExists = await Areas.findById(area);
+
+        if(!areaExists) {
+            return res.status(404).json({
+                message:"El area especificado no existe"
+            })
+        }
 
         const nuevaTarea = new TodoList({
             titulo,
             descripcion,
+            area,
+            areaName: areaExists.area,
             usuarioAsignado: null,
             estado: "pendiente"
         })
