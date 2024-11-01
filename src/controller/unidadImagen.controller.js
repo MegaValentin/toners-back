@@ -1,4 +1,4 @@
-import UnidadImagen from "../models/unidadImagen.model"
+import UnidadImagen from "../models/unidadImagen.model.js"
 import xlsx from 'xlsx';
 import fs from 'fs';
 import excelJS from 'exceljs';
