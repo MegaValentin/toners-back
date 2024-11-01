@@ -1,40 +1,173 @@
 import { Router } from "express";
 import { authRequired } from "../middleware/validator.token.js";
 import { verifyRole } from "../middleware/validator.role.js";
-import { getOrders,
-    getOrder,
-    deleteOrder,
-    addOrders,
-    getAreaUsage,
-    deliveryToner, 
-    getMonthlyReport,
-    getYearlyReport,
-    generateOrdersReport,
-    cancelOrder,
-    removeUndeliveredOrder} from "../controller/orders.controller.js";
+import {
+  getOrders,
+  getOrder,
+  deleteOrder,
+  addOrders,
+  getAreaUsage,
+  deliveryToner,
+  getMonthlyReport,
+  getYearlyReport,
+  generateOrdersReport,
+  cancelOrder,
+  removeUndeliveredOrder,
+} from "../controller/orders.controller.js";
 
-const router = Router()
+import {
+  getOrdersUni,
+  getOrderUni,
+  deleteOrderUni,
+  deliveryUni,
+  addOrdersUni,
+  cancelOrderUni,
+} from "../controller/ordersuni.controller.js";
+const router = Router();
 
-router.get('/orders', authRequired, verifyRole(['admin', 'empleado','superadmin']), getOrders)
+router.get(
+  "/orders",
+  authRequired,
+  verifyRole(["admin", "empleado", "superadmin"]),
+  getOrders
+);
 
-router.get('/order/:id',authRequired, verifyRole(['admin','superadmin']), getOrder)
+router.get(
+  "/orderuni",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  getOrdersUni
+);
 
-router.get('/history', authRequired, verifyRole(['admin','superadmin']), getAreaUsage)
+router.get(
+  "/order/:id",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  getOrder
+);
 
-router.delete('/order/:id',authRequired, verifyRole(['admin','superadmin']), deleteOrder)
+router.get(
+  "/orderuni/:id",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  getOrderUni
+);
 
-router.post('/addorders', authRequired, verifyRole(['admin', 'empleado','superadmin']),  addOrders)
+router.get(
+  "/history",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  getAreaUsage
+);
 
-router.put('/orders/:id/deliver',authRequired, verifyRole(['admin', 'empleado','superadmin']), deliveryToner)
+router.get("/historyuni", authRequired, verifyRole(["admin", "superadmin"]));
 
-router.get('/report/monthly', authRequired, verifyRole(['admin','superadmin']),getMonthlyReport)
+router.delete(
+  "/order/:id",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  deleteOrder
+);
 
-router.get('/report/yearly', authRequired, verifyRole(['admin','superadmin']), getYearlyReport)
+router.delete(
+  "/orderuni/:id",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  deleteOrderUni
+);
 
-router.post('/cancel/:id', authRequired, verifyRole(['admin','superadmin']), cancelOrder)
+router.post(
+  "/addorders",
+  authRequired,
+  verifyRole(["admin", "empleado", "superadmin"]),
+  addOrders
+);
 
-router.delete('/remove/:id', authRequired, verifyRole(['admin','superadmin']), removeUndeliveredOrder)
+router.post(
+  "/addordersuni",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  addOrdersUni
+);
 
-router.get('/orders/report', authRequired, verifyRole(['admin','superadmin']), generateOrdersReport)
+router.put(
+  "/orders/:id/deliver",
+  authRequired,
+  verifyRole(["admin", "empleado", "superadmin"]),
+  deliveryToner
+);
 
-export default router
+router.put(
+  "/orderuni/:id/deliver",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  deliveryUni
+);
+
+router.get(
+  "/report/monthly",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  getMonthlyReport
+);
+
+router.get(
+  "/reportuni/monthly",
+  authRequired,
+  verifyRole(["admin", "superadmin"])
+);
+
+router.get(
+  "/report/yearly",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  getYearlyReport
+);
+
+router.get(
+  "/reportuni/yearly",
+  authRequired,
+  verifyRole(["admin", "superadmin"])
+);
+
+router.post(
+  "/cancel/:id",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  cancelOrder
+);
+
+router.post(
+  "/cancel/:id",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  cancelOrderUni
+);
+
+router.delete(
+  "/remove/:id",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  removeUndeliveredOrder
+);
+
+router.delete(
+  "/removeuni/:id",
+  authRequired,
+  verifyRole(["admin", "superadmin"])
+);
+
+router.get(
+  "/orders/report",
+  authRequired,
+  verifyRole(["admin", "superadmin"]),
+  generateOrdersReport
+);
+
+router.get(
+  "/orderuni/report",
+  authRequired,
+  verifyRole(["admin", "superadmin"])
+);
+
+export default router;
