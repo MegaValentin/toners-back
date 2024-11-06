@@ -22,6 +22,7 @@ import {
   deliveryUni,
   addOrdersUni,
   cancelOrderUni,
+  removeUndeliveredOrderUni
 } from "../controller/ordersuni.controller.js";
 const router = Router();
 
@@ -100,7 +101,7 @@ router.put(
 router.put(
   "/orderuni/:id/deliver",
   authRequired,
-  verifyRole(["admin", "superadmin"]),
+  verifyRole(["admin", "empleado", "superadmin"]),
   deliveryUni
 );
 
@@ -154,7 +155,8 @@ router.delete(
 router.delete(
   "/removeuni/:id",
   authRequired,
-  verifyRole(["admin", "superadmin"])
+  verifyRole(["admin", "superadmin"]),
+  removeUndeliveredOrderUni
 );
 
 router.get(

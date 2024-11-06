@@ -66,12 +66,12 @@ export const deliveryUni = async (req, res) => {
     if (orderUni) {
       const uni = await UnidadImagen.findById(orderUni.uni);
       if (uni) {
-        if (uni.cantidad < order.cantidad) {
+        if (uni.cantidad < orderUni.cantidad) { 
           return res.status(400).json({
-            message: "No hay unidad de imagen",
+            message: "No hay suficiente cantidad de unidad de imagen",
           });
         }
-        uni.cantidad -= order.cantidad;
+        uni.cantidad -= orderUni.cantidad; 
         if (uni.cantidad < 0) {
           uni.cantidad = 0;
         }
@@ -86,18 +86,17 @@ export const deliveryUni = async (req, res) => {
           orderUni,
         });
       } else {
-        res.status(404).json({ message: "Unidad de imagen no encontra" });
+        res.status(404).json({ message: "Unidad de imagen no encontrada" });
       }
     } else {
       res.status(404).json({
-        message: "Order not found",
+        message: "Orden no encontrada",
       });
     }
   } catch (error) {
     res.status(500).json({ message: "Error updating order and stock", error });
   }
 };
-
 export const addOrdersUni = async (req, res) => {
   try {
     const { uni, cantidad, area } = req.body;
@@ -175,5 +174,28 @@ export const cancelOrderUni = async (req, res) => {
 
     console.error('Error canceling order and updating stock', error);
     res.status(500).json({ message: 'Error canceling order and updating stock', error });
+  }
+}
+
+export const removeUndeliveredOrderUni = async(req, res) => {
+  const { id } = req.params
+
+  try {
+    const order = await OrdersUni.findById(id)
+
+    if(!order){
+      return res.status(404).json({ message: 'Order not found'})
+
+    }
+    if(order.isDelivered) {
+      return res.status(400).json({ message: 'Delivered orders cannot be deleted'})
+
+    }
+
+    await OrdersUni.findByIdAndDelete(id)
+    res.status(200).json({ message: 'Error deleteting undeliverd'})
+  } catch (error) {
+    console.error("Error deleting undeleiverd order: ", error)
+    res.status(500).json({ message: "Error deleting undelivered"})
   }
 }
