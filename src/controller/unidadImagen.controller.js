@@ -111,19 +111,19 @@ export const reportUni = async (req, res) => {
             return res.status(404).json({message:"No uni data available"})
         }
 
-        const workbook = new excelJS.Workbook()
-        const worksheet = workbook.addWorksheet('Current Stock Report')
-        
-        worksheet.colums = [
+        const workbook = new excelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Current Stock Report');
+    
+        worksheet.columns = [
             {header: 'Marca', key:'marca', width:25},
             {header: 'Unidad de imagen', key:'unidadImagen', width:25},
-            {header: 'Cantidad', key:'cantidad', width:25},
+            {header: 'Stock', key:'cantidad', width:25},
         ]
 
         unis.forEach((uni) => {
             worksheet.addRow({
                 marca:uni.marca,
-                uni: uni.unidadImagen,
+                unidadImagen: uni.unidadImagen,
                 cantidad: uni.cantidad
             })
         })
