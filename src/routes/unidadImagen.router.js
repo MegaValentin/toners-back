@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authRequired } from "../middleware/validator.token.js";
 import { verifyRole } from "../middleware/validator.role.js";
-import { getUnidadImagen ,getUni, updatedUni, reportUni, addUni, deleteUni} from "../controller/unidadImagen.controller.js";
+import { getUnidadImagen ,getUni, updatedUni, reportUni, addUni, deleteUni, restockallUni} from "../controller/unidadImagen.controller.js";
 const router = Router()
 
 router.get('/uni', authRequired, verifyRole(['admin','superadmin']),getUnidadImagen)
@@ -16,7 +16,7 @@ router.put('/uni/:id', authRequired, verifyRole(['admin','superadmin']),updatedU
 
 router.post('/adduni', authRequired, verifyRole(['admin','superadmin']), addUni)
 
-router.post('restockuni', authRequired, verifyRole(['admin','superadmin']))
+router.post('/restockuni', authRequired, verifyRole(['admin','superadmin']), restockallUni)
 
 router.get('/report/unidadImagen', authRequired, verifyRole(['admin','superadmin']),reportUni)
 

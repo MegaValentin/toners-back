@@ -143,3 +143,29 @@ export const reportUni = async (req, res) => {
         res.status(500).json({message:'Error generating current stock report' })
     }
 }
+
+export const restockallUni = async (req, res) => {
+    try {
+        const { restocks } = req.body
+
+        if(!restocks || !Array.isArray(restocks)){
+            return res.status(400).json({message:"Invalid restock data"})
+        }
+        
+        const updatePromise = restocks.map(async (restock) => {
+            const uni = await UnidadImagen.findById(restock.tonerId)
+
+            if(uni){
+                uni.cantidad += restock.cantidad
+                uni.alert = uni.cantidad <=1
+                await uni.save()
+            }
+        })
+
+        await Promise.all(updatePromise)
+        res.status(200).json({ message: 'Restock completed successfully', restocks});
+    } catch (error) {
+        console.error('Error in restock', error);
+        res.status(500).json({message: 'Error in restock'})
+    }
+}

@@ -16,15 +16,27 @@ const areaUsageSchema = new mongoose.Schema({
       toner: {
         type: Schema.Types.ObjectId,
         ref: 'Toner',
-        required: true
+        
       },
       tonerName: {
         type: String,
-        required: true
+        
       },
       cantidad: {
         type: Number,
-        required: true,
+        min: 1
+      }
+    }],
+    uni: [{
+      unidadImagen: {
+        type: Schema.Types.ObjectId,
+        ref: 'UnidadImagen'
+      },
+      UnidadImagenName: {
+        type: String
+      },
+      cantidad: {
+        type: Number,
         min: 1
       }
     }],

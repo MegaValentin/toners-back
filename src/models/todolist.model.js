@@ -6,6 +6,7 @@ const { Schema } = mongoose;
 const todolistSchema = new mongoose.Schema({
   titulo: {
     type: String,
+    enum: ["Red", "Impresora", "Hardware", "Configuracion e Instalacion","Mail", "Relojes", "Traslado"],
     required: true,
   },
   area: {
