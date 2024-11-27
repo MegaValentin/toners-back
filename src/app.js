@@ -1,5 +1,6 @@
 import express from 'express'
 import morgan from 'morgan';
+
 import officesRouter from './routes/areas.routes.js';
 import tonersRoutes from './routes/toners.routes.js';
 import ordersRoutes from './routes/orders.routes.js'
@@ -7,6 +8,8 @@ import stockIdealRoutes from './routes/stockIdeal.routes.js'
 import usersRouters from './routes/users.routes.js'
 import todolistRoutes from './routes/todolist.routes.js' 
 import unidadImagenRoutes from './routes/unidadImagen.router.js';
+import hardwareRoutes from './routes/hardware.routes.js'
+
 import cors from 'cors'
 import dotenv from "dotenv";
 import cookieParser from 'cookie-parser';
@@ -31,6 +34,7 @@ app.use('/api', ordersRoutes)
 app.use('/api', stockIdealRoutes)
 app.use('/api', todolistRoutes)
 app.use('/api', unidadImagenRoutes)
+app.use('/api', hardwareRoutes)
 
 
 
