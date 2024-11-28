@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const hardwareSchema = new mongoose.Schema({
     hardware:{
-        type:String,
+        type:[String],
         required: true
     },
     area:{
