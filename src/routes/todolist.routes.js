@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authRequired } from "../middleware/validator.token.js";
 import { verifyRole } from "../middleware/validator.role.js";
-import { getTasks, getTask, addTask, assignTask , deleteTask, completeTask, getMyTasks, revertTask} from "../controller/todolist.controller.js";
+import { getTasks, getTask, addTask, assignTask , deleteTask, completeTask, getMyTasks, revertTask, generateTasksReport} from "../controller/todolist.controller.js";
 
 const router = Router()
 
@@ -21,4 +21,5 @@ router.get('/mytasks', authRequired, getMyTasks)
 
 router.put('/task/:id/revert',  revertTask)
 
+router.get("/tasks/report", authRequired, verifyRole(["admin", "superadmin"]), generateTasksReport);
 export default router
