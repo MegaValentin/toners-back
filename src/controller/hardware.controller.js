@@ -1,6 +1,8 @@
 import Hardware from "../models/hardware.model.js";
 import Areas from "../models/areas.model.js";
 import PDFDocument from "pdfkit";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 export const getHardwares = async (req, res) => {
   try {
@@ -58,7 +60,7 @@ export const addHardwares = async (req, res) => {
 
     console.log(newOrderHardware);
 
-    const savedOrderHardaware = await newOrderHardware.save();
+    const savedOrderHardware = await newOrderHardware.save();
 
     const doc = new PDFDocument();
 
@@ -68,21 +70,76 @@ export const addHardwares = async (req, res) => {
       "attachment; filename=Orden_Hardware.pdf"
     );
 
-    doc.pipe(res)
-
-    doc.fontSize(18).text("Orden de Compra", {align: "center"})
-    doc.moveDown()
-
-    doc.fontSize(14).text(`Área: ${savedOrderHardaware.areaName}`)
-    doc.text("Hardware Solicitado:", { underline: true });
-    hardware.forEach((item) => {
-      doc.text(` ${item}`); // Enumerar cada hardware
-    });
-    doc.text(`${savedOrderHardaware.description}`)
-    doc.text(`${savedOrderHardaware.fecha}`)
-
-    doc.end()
+    doc.pipe(res);
     
+    doc.image("../logoReporte.jpg", {
+      fit: [150, 150], 
+      align: "center", 
+      valign: "top",  
+    });
+    
+    
+    doc.moveDown(6);
+
+    doc.fontSize(12);
+    const formattedDate = format(
+      new Date(savedOrderHardware.fecha),
+      "d 'de' MMMM 'de' yyyy",
+      { locale: es }
+    );
+
+    doc.text(`Bolivar, ${formattedDate}`, {
+      align: "right",
+    });
+
+    doc.moveDown(3);
+    
+    doc.text("Jefe de Compras", {
+      align: "left",
+    });
+    doc.text("Sr. Eugenio Silva", {
+      align: "left",
+    });
+    doc.text("Municipalidad de Bolivar", {
+      align: "left",
+    });
+
+    doc.moveDown(2);
+    
+
+    doc.text("Tengo el agrado de dirigirme a Ud, a fin de solicitarle.", {
+      align: "right",
+    });
+    hardware.forEach((item) => {
+      doc.text(` - ${item}`, {
+        align: "center",
+      }); // Enumerar cada hardware
+    });
+
+    doc.moveDown(3);
+    
+
+    doc.text(`${savedOrderHardware.description}`);
+    doc.text(`Área solicitante: ${savedOrderHardware.areaName}`);
+
+    doc.moveDown(2);
+    
+
+    doc.text(
+      " Sin otro particular aprovecho la oportunidad para saludarlo atte ",
+      {
+        align: "right",
+      }
+    );
+
+    doc.moveDown(2);
+    
+    doc.text("Departamento de Sistemas", {
+      align: "left",
+    });
+
+    doc.end();
+
   } catch (error) {
     console.error("Error al agregar la orden", error);
     res.status(500).json({
@@ -124,3 +181,4 @@ export const confirmOrderHardware = async (req, res) => {
     }
   } catch (error) {}
 };
+

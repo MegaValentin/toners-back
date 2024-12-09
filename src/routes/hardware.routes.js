@@ -6,7 +6,8 @@ import {
   getHardware,
   deleteHardware,
   addHardwares,
-  confirmOrderHardware
+  confirmOrderHardware,
+ 
 } from "../controller/hardware.controller.js";
 const router = Router();
 
@@ -19,6 +20,7 @@ router.post("/addhardware", authRequired, verifyRole(['admin','superadmin']),add
 router.delete("/hardware/:id", authRequired,verifyRole(['admin','superadmin']), deleteHardware);
 
 router.put("/hardware/:id", authRequired,verifyRole(['admin','superadmin']), confirmOrderHardware);
+
 
 
 export default router
