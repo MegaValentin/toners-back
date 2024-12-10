@@ -3,6 +3,7 @@ import Areas from "../models/areas.model.js";
 import PDFDocument from "pdfkit";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import path from "path";
 
 export const getHardwares = async (req, res) => {
   try {
@@ -72,7 +73,7 @@ export const addHardwares = async (req, res) => {
 
     doc.pipe(res);
     
-    doc.image("../logoReporte.jpg", {
+    doc.image(path.resolve("../logoReporte.jpg"), {
       fit: [150, 150], 
       align: "center", 
       valign: "top",  
@@ -111,9 +112,7 @@ export const addHardwares = async (req, res) => {
       align: "right",
     });
     hardware.forEach((item) => {
-      doc.text(` - ${item}`, {
-        align: "center",
-      }); // Enumerar cada hardware
+      doc.text(`• ${item}`, { align: "center", indent: 20 });
     });
 
     doc.moveDown(3);
@@ -182,3 +181,81 @@ export const confirmOrderHardware = async (req, res) => {
   } catch (error) {}
 };
 
+export const downloadDocs = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const savedOrderHardware = await Hardware.findById(id);
+    if (!savedOrderHardware) {
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+
+    const { hardware, description, areaName, fecha } = savedOrderHardware;
+
+    const doc = new PDFDocument();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Orden_Hardware_${id}.pdf`
+    );
+
+    doc.pipe(res);
+
+    doc.image("../logoReporte.jpg", {
+      fit: [150, 150], // Tamaño del logo
+      align: "center",
+      valign: "top",
+    });
+
+    doc.moveDown(4);
+
+    const formattedDate = format(new Date(fecha), "d 'de' MMMM 'de' yyyy", {
+      locale: es,
+    });
+    doc.fontSize(12).text(`Bolivar, ${formattedDate}`, {
+      align: "right",
+    });
+
+    doc.moveDown(3);
+
+    doc.text("Jefe de Compras", { align: "left" });
+    doc.text("Sr. Eugenio Silva", { align: "left" });
+    doc.text("Municipalidad de Bolivar", { align: "left" });
+
+    doc.moveDown(2);
+
+    doc.text("Tengo el agrado de dirigirme a Ud, a fin de solicitarle:", {
+      align: "right",
+    });
+
+    doc.moveDown();
+    hardware.forEach((item) => {
+      doc.text(`• ${item}`, { align: "center", indent: 20 });
+    });
+
+    doc.moveDown(3);
+
+    doc.text(`${description}`, { align: "left" });
+
+    doc.text(`Área solicitante: ${areaName}`, { align: "left" });
+
+    doc.moveDown(2);
+
+    doc.text(
+      "Sin otro particular, aprovecho la oportunidad para saludarlo atte.",
+      {
+        align: "right",
+      }
+    );
+
+    doc.moveDown(2);
+
+    doc.text("Departamento de Sistemas", { align: "left" });
+
+    doc.end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al generar el PDF" });
+  }
+}
