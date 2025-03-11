@@ -43,6 +43,36 @@ export const createIdealStock = async (req, res) => {
   }
 };
 
+export const updatedIdealStock = async (req, res) => {
+  try {
+    const { id } = res.params;
+    const { marca, toner, stockIdeal } = req.body;
+
+    if (!toner && !marca && stockIdeal === undefined) {
+      return res.status(400).json({
+        message: 'El campo "toner" y "cantidad" son requeridos',
+      });
+    }
+
+    const udpatedStockIdeal = await StockIdeal.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+
+    if (!updatedToner) {
+      return res.status(404).json({
+        message: "Toner no encontrado",
+      });
+    }
+
+    res.json(udpatedStockIdeal);
+  } catch (error) {
+    console.error("Error al actualizar el toner: ", error);
+    res.status(500).json({
+      message: "Error al acualizar el Stock",
+    });
+  }
+};
+
 export const getIdealStocks = async (req, res) => {
   try {
     const idealStocks = await StockIdeal.find();
@@ -66,74 +96,89 @@ export const pedidoStock = async (req, res) => {
     const currentStock = await Toners.find({});
     const idealStocks = await StockIdeal.find({});
 
-    const stockCompare = idealStocks.map((ideal) => {
-      const current = currentStock.find((item) => item.toner === ideal.toner);
-      const currentCantidad = current ? current.cantidad : 0;
-      const needed = ideal.stockIdeal - currentCantidad;
+    const allToners = [
+      ...new Set([
+        ...idealStocks.map((i) => i.toner),
+        ...currentStock.map((c) => c.toner),
+      ]),
+    ];
+
+    const stockCompare = allToners.map((tonerName) => {
+      const ideal = idealStocks.find(
+        (i) => i.toner.trim().toLowerCase() === tonerName.trim().toLowerCase()
+      );
+      const current = currentStock.find(
+        (c) => c.toner.trim().toLowerCase() === tonerName.trim().toLowerCase()
+      );
 
       return {
-        marca: ideal.marca,
-        toner: ideal.toner,
-        ideal: ideal.stockIdeal,
-        current: currentCantidad,
-        needed: needed > 0 ? needed : 0,
+        marca: ideal?.marca || current?.marca || "Desconocido",
+        toner: tonerName,
+        ideal: ideal ? ideal.stockIdeal : 0,
+        current: current ? current.cantidad : 0,
+        needed: ideal
+          ? Math.max(ideal.stockIdeal - (current?.cantidad || 0), 0)
+          : 0,
       };
+      
     });
     res.status(200).json(stockCompare);
   } catch (error) {
     res.status(500).json([{ error: error.message }]);
   }
 };
- 
+
 export const enviarPedidoStock = async (req, res) => {
   try {
     const stockIdeal = await StockIdeal.find();
     const stockActual = await Toners.find();
 
-    const recommendedOrder = stockIdeal.map(ideal => {
-      const actual = stockActual.find(a => a.toner === ideal.toner) || { cantidad: 0 };
-      const currentCantidad = actual ? actual.cantidad : 0;
-      const pedido = ideal.stockIdeal - currentCantidad;
-      return {
-        Marca: ideal.marca,
-        Toner: ideal.toner,
-        Pedido: pedido,
-        Cantidad: actual.cantidad,
-        StockIdeal: ideal.stockIdeal
-      };
-    }).filter(order => order.Pedido > 0);
+    const recommendedOrder = stockIdeal
+      .map((ideal) => {
+        const actual = stockActual.find((a) => a.toner === ideal.toner) || {
+          cantidad: 0,
+        };
+        const currentCantidad = actual ? actual.cantidad : 0;
+        const pedido = ideal.stockIdeal - currentCantidad;
+        return {
+          Marca: ideal.marca,
+          Toner: ideal.toner,
+          Pedido: pedido,
+          Cantidad: actual.cantidad,
+          StockIdeal: ideal.stockIdeal,
+        };
+      })
+      .filter((order) => order.Pedido > 0);
 
-    
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Pedido Recomendado');
+    const worksheet = workbook.addWorksheet("Pedido Recomendado");
 
-    
     worksheet.columns = [
-      { header: 'Marca', key: 'Marca', width: 20 },
-      { header: 'Toner', key: 'Toner', width: 20 },
-      { header: 'Pedido', key: 'Pedido', width: 20 },
-      { header: 'Stock', key: 'Cantidad', width:20},
-      { header: 'StockIdeal', key: 'StockIdeal', width:20},
-
+      { header: "Marca", key: "Marca", width: 20 },
+      { header: "Toner", key: "Toner", width: 20 },
+      { header: "Pedido", key: "Pedido", width: 20 },
+      { header: "Stock", key: "Cantidad", width: 20 },
+      { header: "StockIdeal", key: "StockIdeal", width: 20 },
     ];
 
-    
-    recommendedOrder.forEach(order => {
+    recommendedOrder.forEach((order) => {
       worksheet.addRow(order);
     });
 
-    
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=pedido-recomendado.xlsx');
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=pedido-recomendado.xlsx"
+    );
 
-    
     await workbook.xlsx.write(res);
 
-    
     res.end();
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error en el servidor.');
+    res.status(500).send("Error en el servidor.");
   }
-  
 };
