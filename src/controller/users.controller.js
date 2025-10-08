@@ -126,7 +126,7 @@ export const getUser = async (req, res) => {
 
     } catch (error) {
         return res.status(500).json({ message: "error al buscar los usuarios" })
-    }
+    } 
 }
 
 export const deleteUser = async (req, res) => {

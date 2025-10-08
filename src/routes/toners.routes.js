@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getToners, getToner,getLowToner, deleteToner, updatedToner, addToners, postReStock, restockAllPost, addAllToners, lowTonerStock, reportToners} from "../controller/toners.controller.js";
+import { getToners, getToner, deleteToner, updatedToner, addToners, postReStock, restockAllPost, addAllToners, reportToners, getRecommendedOrders, getLowStockToners} from "../controller/toners.controller.js";
 import { createTonerSchema } from "../schemas/toners.schemas.js"
 import { validateSchema } from "../middleware/validator.middleware.js";
 import multer from 'multer';
@@ -13,8 +13,6 @@ router.get('/toners', authRequired, verifyRole(['admin','superadmin', 'empleado'
 
 router.get('/toner/:id', authRequired, verifyRole(['admin','superadmin']), getToner)
 
-router.get('/low-toner', authRequired, verifyRole(['admin','superadmin']), lowTonerStock)
-
 router.delete('/toner/:id', authRequired, verifyRole(['admin','superadmin']), deleteToner)
 
 router.put('/toner/:id', authRequired, verifyRole(['admin','superadmin']), updatedToner )
@@ -27,8 +25,10 @@ router.post('/restockall', authRequired, verifyRole(['admin','superadmin']), res
 
 router.post('/addalltoners', upload.single('file'), addAllToners)
 
-router.get('/lowstock', lowTonerStock)
-
 router.get('/report/toner', authRequired, verifyRole(['admin','superadmin']), reportToners)
+
+router.get('/recommended',authRequired, verifyRole(['admin','superadmin']), getRecommendedOrders)
+
+router.get('/lowstock', getLowStockToners)
 
 export default router

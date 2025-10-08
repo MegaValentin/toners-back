@@ -1,5 +1,4 @@
 import Toners from "../models/toners.model.js"
-import StockIdeal from "../models/stockIdeal.model.js"
 import xlsx from 'xlsx';
 import fs from 'fs';
 import excelJS from 'exceljs';
@@ -35,44 +34,6 @@ export const getToner = async (req, res) => {
     }
 }
 
-export const lowTonerStock = async (req, res) => {
-    try {
-      const currentStock = await Toners.find({});
-      const idealStocks = await StockIdeal.find({});
-  
-      const stockCompare = idealStocks.map((ideal) => {
-        const current = currentStock.find(item => item.toner === ideal.toner)
-        const currentCantidad = current ? current.cantidad : 0
-        const idealThirtyPercent = Math.ceil(ideal.stockIdeal * 0.3)
-
-        return {
-          marca: ideal.marca,
-          toner: ideal.toner,
-          ideal: ideal.stockIdeal,
-          idealThirtyPercent: idealThirtyPercent,
-          current: currentCantidad,
-          
-        };
-      });
-  
-      const lowStockToners = stockCompare.filter(item => item.current <= item.idealThirtyPercent);
-  
-      res.status(200).json(lowStockToners);
-    } catch (error) {
-      res.status(500).json([{ error: error.message }]);
-    }
-};
-
-export const getLowToner = async (req,res) => {
-    try {
-        const lowToner = await Toners.find({cantidad: {$lte:2}})
-        res.status(200).json(lowToner)
-
-    } catch (error) {
-        console.error('Error fetching low toner: ', error);
-        res.status(500).json({message: 'Error fetchin low toner'})
-    }
-}
 
 export const deleteToner = async (req, res) => {
     try {
@@ -125,9 +86,9 @@ export const updatedToner = async (req, res) => {
 export const addToners = async (req, res) => {
 
     try {
-        const { toner, cantidad, marca } = req.body;
+        const { toner, cantidad, marca, cantidadIdeal } = req.body;
 
-        if (!toner || !marca || cantidad === undefined) {
+        if (!toner || !marca || cantidad === undefined || cantidadIdeal === undefined) {
             return res.status(400).json({ message: 'El nombre y la cantidad son requeridos' })
         }
 
@@ -140,7 +101,7 @@ export const addToners = async (req, res) => {
             const updatedToner = await existingToner.save()
             res.status(200).json(updatedToner)
         } else {
-            const newToner = new Toners({ marca, toner, cantidad })
+            const newToner = new Toners({ marca, toner, cantidad, cantidadIdeal })
             const savedToner = await newToner.save()
             res.status(201).json(savedToner)
         }
@@ -273,4 +234,52 @@ export const reportToners = async (req,res) => {
         console.error('Error generating current stock report:', error);
         res.status(500).json({ message: 'Error generating current stock report' });
       }
+}
+
+export const getRecommendedOrders = async ( req, res ) => {
+    try {
+        const toners = await Toners.find()
+
+        const getRecommendedOrders = toners.map(t => {
+            const pedidoRecomendado = Math.max(t.cantidadIdeal - t.cantidad, 0)
+
+            return {
+                _id: t._id,
+                marca: t.marca,
+                toner: t.toner,
+                cantidadActual: t.cantidad,
+                cantidadIdeal: t.cantidadIdeal,
+                pedidoRecomendado
+              };
+        })
+
+        res.json(getRecommendedOrders)
+    } catch (error) {
+        res.status(500).json({ mesage: "Error al calcular el pedido recomendado"})
+    }
+}
+
+export const getLowStockToners = async (req, res) => {
+    try {
+        const toners = await Toners.find()
+
+        const lowStock = toners
+            .filter(t => {
+                if(t.cantidadIdeal <= 0) return false
+                const porcentaje = (t.cantidad / t.cantidadIdeal) * 100
+                return porcentaje < 35
+            }).map(t => ({
+                _id: t._id,
+                marca: t.marca,
+                toner: t.toner,
+                cantidadActual: t.cantidad,
+                cantidadIdeal: t.cantidadIdeal,
+                porcentaje: ((t.cantidad / t.cantidadIdeal) * 100).toFixed(2) + "%",
+                faltante: Math.max(t.cantidadIdeal - t.cantidad, 0)
+              }));
+
+        res.json(lowStock);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener los tóners con poco stock", error });
+    }
 }
