@@ -8,6 +8,7 @@ import usersRouters from './routes/users.routes.js'
 import todolistRoutes from './routes/todolist.routes.js' 
 import unidadImagenRoutes from './routes/unidadImagen.router.js';
 import hardwareRoutes from './routes/hardware.routes.js'
+import printRoutes from './routes/print.routes.js'
 
 import cors from 'cors'
 import dotenv from "dotenv";
@@ -33,6 +34,7 @@ app.use('/api', ordersRoutes)
 app.use('/api', todolistRoutes)
 app.use('/api', unidadImagenRoutes)
 app.use('/api', hardwareRoutes)
+app.use('/api', printRoutes)
 
 
 

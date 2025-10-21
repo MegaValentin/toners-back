@@ -2,6 +2,7 @@ import Toners from "../models/toners.model.js"
 import xlsx from 'xlsx';
 import fs from 'fs';
 import excelJS from 'exceljs';
+import nodemailer from 'nodemailer'
 
 export const getToners = async (req, res) => {
     try {
@@ -267,7 +268,7 @@ export const getLowStockToners = async (req, res) => {
             .filter(t => {
                 if(t.cantidadIdeal <= 0) return false
                 const porcentaje = (t.cantidad / t.cantidadIdeal) * 100
-                return porcentaje < 35
+                return porcentaje < 80
             }).map(t => ({
                 _id: t._id,
                 marca: t.marca,
@@ -283,3 +284,4 @@ export const getLowStockToners = async (req, res) => {
         res.status(500).json({ message: "Error al obtener los tóners con poco stock", error });
     }
 }
+
