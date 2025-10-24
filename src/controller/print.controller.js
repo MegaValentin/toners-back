@@ -122,7 +122,7 @@ export const updatedPrint = async (req, res) => {
         print.toner = toner || print.toner
         print.tonerName = tonerName
 
-        const updatedPrint = await Print.save()
+        const updatedPrint = await print.save()
 
         res.json({
             message: "impresora actualizada exitosamente",
