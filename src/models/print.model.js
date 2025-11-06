@@ -12,7 +12,7 @@ const printSchema = new mongoose.Schema({
     },
     toner: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Toner',
+        ref: 'Toners',
         required: true
     },
     tonerName: {

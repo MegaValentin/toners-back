@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { authRequired } from "../middleware/validator.token.js"
 import { verifyRole } from "../middleware/validator.role.js"
-import { getPrint, getPrints, deletePrint, addPrint, getListPrint, updatedPrint } from "../controller/print.controller.js"
+import { getPrint, getPrints, deletePrint, addPrint, getListPrint, updatedPrint, paginatedAndFilter } from "../controller/print.controller.js"
 
 const router = Router()
 
@@ -16,5 +16,7 @@ router.put('/print/:id', authRequired, verifyRole(["admin", "superadmin", "emple
 router.post('/addprint', authRequired, verifyRole([ "admin", "superadmin", "empleado"]), addPrint)
 
 router.get('/listprint/:tonerId', authRequired, verifyRole(["admin", "superadmin", "empleado"]), getListPrint)
+
+router.get('/prints/filt', paginatedAndFilter)
 
 export default router
