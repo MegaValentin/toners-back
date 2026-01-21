@@ -3,10 +3,19 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const hardwareSchema = new mongoose.Schema({
-    hardware:{
-        type:[String],
-        required: true
-    },
+    hardware: [
+        {
+          nombre: {
+            type: String,
+            required: true
+          },
+          cantidad: {
+            type: Number,
+            required: true,
+            min: 1
+          }
+        }
+      ],
     area:{
         type: Schema.Types.ObjectId,
         ref:'Area',
@@ -27,7 +36,7 @@ const hardwareSchema = new mongoose.Schema({
     confirm:{
         type: Boolean,
         default: false
-      }
+    }
 })
 
 export default mongoose.model('Hardware', hardwareSchema)

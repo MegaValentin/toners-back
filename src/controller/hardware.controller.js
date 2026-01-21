@@ -52,6 +52,10 @@ export const addHardwares = async (req, res) => {
       });
     }
 
+    if (!hardware || hardware.length === 0) {
+      return res.status(400).json({ message: "Debe agregar hardware" });
+    }
+
     const newOrderHardware = new Hardware({
       hardware,
       area,
@@ -72,14 +76,13 @@ export const addHardwares = async (req, res) => {
     );
 
     doc.pipe(res);
-    
+
     doc.image(path.resolve("../logoReporte.jpg"), {
-      fit: [150, 150], 
-      align: "center", 
-      valign: "top",  
+      fit: [150, 150],
+      align: "center",
+      valign: "top",
     });
-    
-    
+
     doc.moveDown(6);
 
     doc.fontSize(12);
@@ -94,11 +97,11 @@ export const addHardwares = async (req, res) => {
     });
 
     doc.moveDown(3);
-    
+
     doc.text("Jefe de Compras", {
       align: "left",
     });
-    doc.text("Sr. Eugenio Silva", {
+    doc.text("Sra. Pia Pavia", {
       align: "left",
     });
     doc.text("Municipalidad de Bolivar", {
@@ -106,39 +109,53 @@ export const addHardwares = async (req, res) => {
     });
 
     doc.moveDown(2);
-    
 
     doc.text("Tengo el agrado de dirigirme a Ud, a fin de solicitarle.", {
       align: "right",
     });
-    hardware.forEach((item) => {
-      doc.text(`• ${item}`, { align: "center", indent: 20 });
+    doc.moveDown();
+
+    const tableTop = doc.y;
+    const rowHeight = 25;
+    const startX = 90;
+    const colHardwareW = 260;
+    const colCantidadW = 80;
+    const colHardwareX = startX;
+    const colCantidadX = colHardwareX + colHardwareW;
+
+    hardware.forEach((item, index) => {
+      const y = tableTop + index * rowHeight;
+      doc.rect(colHardwareX, y, colHardwareW, rowHeight).stroke();
+      doc.rect(colCantidadX, y, colCantidadW, rowHeight).stroke();
+      doc.text(item.nombre, colHardwareX + 5, y + 7, {
+        width: colHardwareW - 10,
+        align: "left",
+      });
+      doc.text(String(item.cantidad), colCantidadX, y + 7, {
+        width: colCantidadW,
+        align: "center",
+      });
     });
 
-    doc.moveDown(3);
-    
-
-    doc.text(`${savedOrderHardware.description}`);
-    doc.text(`Área solicitante: ${savedOrderHardware.areaName}`);
+    doc.y = tableTop + hardware.length * rowHeight + 20;
+    doc.x = doc.page.margins.left;
 
     doc.moveDown(2);
-    
+
+    doc.text(savedOrderHardware.description);
+
+    doc.moveDown(2);
 
     doc.text(
-      " Sin otro particular aprovecho la oportunidad para saludarlo atte ",
-      {
-        align: "right",
-      }
+      "Sin otro particular aprovecho la oportunidad para saludarlo atte",
+      { align: "right" }
     );
 
     doc.moveDown(2);
-    
-    doc.text("Departamento de Sistemas", {
-      align: "left",
-    });
+
+    doc.text("Departamento de Sistemas");
 
     doc.end();
-
   } catch (error) {
     console.error("Error al agregar la orden", error);
     res.status(500).json({
@@ -190,7 +207,7 @@ export const downloadDocs = async (req, res) => {
       return res.status(404).json({ message: "Orden no encontrada" });
     }
 
-    const { hardware, description, areaName, fecha } = savedOrderHardware;
+    const { hardware, description, fecha } = savedOrderHardware;
 
     const doc = new PDFDocument();
 
@@ -199,63 +216,71 @@ export const downloadDocs = async (req, res) => {
       "Content-Disposition",
       `attachment; filename=Orden_Hardware_${id}.pdf`
     );
-
     doc.pipe(res);
-
     doc.image("../logoReporte.jpg", {
       fit: [150, 150], // Tamaño del logo
       align: "center",
       valign: "top",
     });
-
     doc.moveDown(4);
-
     const formattedDate = format(new Date(fecha), "d 'de' MMMM 'de' yyyy", {
       locale: es,
     });
     doc.fontSize(12).text(`Bolivar, ${formattedDate}`, {
       align: "right",
     });
-
     doc.moveDown(3);
-
     doc.text("Jefe de Compras", { align: "left" });
-    doc.text("Sr. Eugenio Silva", { align: "left" });
+    doc.text("Sra. Pia Pavia", { align: "left" });
     doc.text("Municipalidad de Bolivar", { align: "left" });
-
     doc.moveDown(2);
-
     doc.text("Tengo el agrado de dirigirme a Ud, a fin de solicitarle:", {
       align: "right",
     });
-
     doc.moveDown();
-    hardware.forEach((item) => {
-      doc.text(`• ${item}`, { align: "center", indent: 20 });
+    const tableTop = doc.y;
+    const rowHeight = 25;
+    const startX = 90;
+    const colHardwareW = 260;
+    const colCantidadW = 80;
+    const colHardwareX = startX;
+    const colCantidadX = colHardwareX + colHardwareW;
+
+    hardware.forEach((item, index) => {
+      const y = tableTop + index * rowHeight;
+      doc.rect(colHardwareX, y, colHardwareW, rowHeight).stroke();
+      doc.rect(colCantidadX, y, colCantidadW, rowHeight).stroke();
+      doc.text(item.nombre, colHardwareX + 5, y + 7, {
+        width: colHardwareW - 10,
+        align: "left",
+      });
+      doc.text(String(item.cantidad), colCantidadX, y + 7, {
+        width: colCantidadW,
+        align: "center",
+      });
     });
 
-    doc.moveDown(3);
+    doc.y = tableTop + hardware.length * rowHeight + 20;
+    doc.x = doc.page.margins.left;
 
-    doc.text(`${description}`, { align: "left" });
+    doc.moveDown(2);
 
-    doc.text(`Área solicitante: ${areaName}`, { align: "left" });
+    doc.text(savedOrderHardware.description);
 
     doc.moveDown(2);
 
     doc.text(
-      "Sin otro particular, aprovecho la oportunidad para saludarlo atte.",
-      {
-        align: "right",
-      }
+      "Sin otro particular aprovecho la oportunidad para saludarlo atte",
+      { align: "right" }
     );
 
     doc.moveDown(2);
 
-    doc.text("Departamento de Sistemas", { align: "left" });
+    doc.text("Departamento de Sistemas");
 
     doc.end();
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al generar el PDF" });
   }
-}
+};
