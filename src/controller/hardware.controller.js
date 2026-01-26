@@ -116,9 +116,9 @@ export const addHardwares = async (req, res) => {
     doc.moveDown();
 
     const tableTop = doc.y;
-    const rowHeight = 25;
+    const rowHeight = 18;
     const startX = 90;
-    const colHardwareW = 260;
+    const colHardwareW = 230;
     const colCantidadW = 80;
     const colHardwareX = startX;
     const colCantidadX = colHardwareX + colHardwareW;
@@ -128,7 +128,7 @@ export const addHardwares = async (req, res) => {
       doc.rect(colHardwareX, y, colHardwareW, rowHeight).stroke();
       doc.rect(colCantidadX, y, colCantidadW, rowHeight).stroke();
       doc.text(item.nombre, colHardwareX + 5, y + 7, {
-        width: colHardwareW - 10,
+        width: doc.fontSize(10),
         align: "left",
       });
       doc.text(String(item.cantidad), colCantidadX, y + 7, {
@@ -141,11 +141,11 @@ export const addHardwares = async (req, res) => {
     doc.x = doc.page.margins.left;
 
     doc.moveDown(2);
-
+    doc.fontSize(12)
     doc.text(savedOrderHardware.description);
 
     doc.moveDown(2);
-
+    
     doc.text(
       "Sin otro particular aprovecho la oportunidad para saludarlo atte",
       { align: "right" }
@@ -153,7 +153,7 @@ export const addHardwares = async (req, res) => {
 
     doc.moveDown(2);
 
-    doc.text("Departamento de Sistemas");
+    doc.text("Departamento de Informatica");
 
     doc.end();
   } catch (error) {
@@ -239,10 +239,10 @@ export const downloadDocs = async (req, res) => {
     });
     doc.moveDown();
     const tableTop = doc.y;
-    const rowHeight = 25;
+    const rowHeight = 18;
     const startX = 90;
     const colHardwareW = 260;
-    const colCantidadW = 80;
+    const colCantidadW = 40;
     const colHardwareX = startX;
     const colCantidadX = colHardwareX + colHardwareW;
 
