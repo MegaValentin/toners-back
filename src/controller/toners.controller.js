@@ -6,6 +6,19 @@ import PDFDocument from "pdfkit";
 import path from "path";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  Table,
+  TableRow,
+  TableCell,
+  TextRun,
+  AlignmentType,
+  WidthType,
+  Header,
+  ImageRun,
+} from "docx";
 
 export const getToners = async (req, res) => {
   try {
@@ -324,15 +337,15 @@ export const docRecommendedTonersOrders = async (req, res) => {
         align: "center",
       });
       rowIndex++;
-    }); 
-  
+    });
+
     doc.y = tableTop + toners.length * rowHeight + 10;
     doc.x = doc.page.margins.left;
-    
+
     const paddingAfterTable = 6;
     doc.y = tableTop + rowIndex * rowHeight + paddingAfterTable;
-    console.log(doc.y)
-    
+    console.log(doc.y);
+
     doc.fontSize(12);
     doc.moveDown(2);
     doc.text(
@@ -350,6 +363,183 @@ export const docRecommendedTonersOrders = async (req, res) => {
   } catch (error) {
     console.error("ERROR PDF:", error);
     res.status(500).json({ message: "Error generando el PDF" });
+  }
+};
+
+export const docRecommendedTonersOrdersWord = async (req, res) => {
+  try {
+    const toners = await Toners.find();
+    if (!toners || toners.length === 0) {
+      return res.status(404).json({ message: "No toner data available" });
+    }
+    const tonersConPedido = toners
+      .map((t) => ({
+        marca: t.marca,
+        toner: t.toner,
+        pedido: Math.max(t.cantidadIdeal - t.cantidad, 0),
+      }))
+      .filter((t) => t.pedido > 0);
+    const formattedDate = format(new Date(), "d 'de' MMMM 'de' yyyy", {
+      locale: es,
+    });
+    const doc = new Document({
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Arial",
+              size: 24, 
+            },
+          },
+        },
+      },
+
+      sections: [
+        {
+          headers: {
+            default: new Header({
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [
+                    new ImageRun({
+                      data: fs.readFileSync(
+                        path.resolve("../logoReporte.jpg")
+                      ),
+                      alignment: AlignmentType.RIGHT,
+                      transformation: {
+                        width: 120,
+                        height: 60,
+                      },
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              children: [
+                new TextRun({
+                  text: `Bolivar, ${formattedDate}`,
+                  bold: true,
+                }),
+              ],
+            }),
+            new Paragraph(""),
+            new Paragraph("Jefe de Compras"),
+            new Paragraph("Sra. Pia Pavia"),
+            new Paragraph("Municipalidad de Bolivar"),
+            new Paragraph(""),
+            new Paragraph({
+              text: "Tengo el agrado de dirigirme a Ud, a fin de solicitarle.",
+              alignment: AlignmentType.RIGHT,
+            }),
+            new Paragraph(""),
+            new Table({
+              width: {
+                size: 100,
+                type: WidthType.PERCENTAGE,
+              },
+              rows: [
+                new TableRow({
+                  children: ["Marca", "Toner", "Pedido Recomendado"].map(
+                    (text) =>
+                      new TableCell({
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text,
+                                bold: true,
+                                size: 20, // 10 pt
+                              }),
+                            ],
+                          }),
+                        ],
+                      })
+                  ),
+                }),
+                ...tonersConPedido.map(
+                  (t) =>
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          children: [
+                            new Paragraph({
+                              children: [
+                                new TextRun({
+                                  text: t.marca,
+                                  size: 20,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        new TableCell({
+                          children: [
+                            new Paragraph({
+                              children: [
+                                new TextRun({
+                                  text: t.toner,
+                                  size: 20,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        new TableCell({
+                          children: [
+                            new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              children: [
+                                new TextRun({
+                                  text: t.pedido.toString(),
+                                  size: 20,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    })
+                ),
+              ],
+            }),
+
+            new Paragraph(""),
+
+            new Paragraph(
+              "Los toners serán utilizados en las diferentes áreas del municipio"
+            ),
+
+            new Paragraph({
+              text: "Sin otro particular aprovecho la oportunidad para saludarlo atte",
+              alignment: AlignmentType.RIGHT,
+            }),
+
+            new Paragraph("Departamento de Informática"),
+          ],
+        },
+      ],
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=Pedido_Toners.docx"
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
+
+    res.send(buffer);
+  } catch (error) {
+    console.error("ERROR WORD:", error);
+    res.status(500).json({ message: "Error generando el Word" });
   }
 };
 

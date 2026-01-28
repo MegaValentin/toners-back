@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { docRecommendedTonersOrders, getToners, getToner, deleteToner, updatedToner, addToners, postReStock, restockAllPost, addAllToners, reportToners, getRecommendedOrders, getLowStockToners} from "../controller/toners.controller.js";
+import { docRecommendedTonersOrdersWord, docRecommendedTonersOrders, getToners, getToner, deleteToner, updatedToner, addToners, postReStock, restockAllPost, addAllToners, reportToners, getRecommendedOrders, getLowStockToners} from "../controller/toners.controller.js";
 import { createTonerSchema } from "../schemas/toners.schemas.js"
 import { validateSchema } from "../middleware/validator.middleware.js";
 import multer from 'multer';
@@ -32,5 +32,7 @@ router.get('/recommended',authRequired, verifyRole(['admin','superadmin']), getR
 router.get('/lowstock', getLowStockToners)
 
 router.get('/recommendes/doc', authRequired, verifyRole(['admin', 'superadmin']), docRecommendedTonersOrders)
+
+router.get('/recommendes/word', authRequired, verifyRole(['admin', 'superadmin']), docRecommendedTonersOrdersWord)
 
 export default router
