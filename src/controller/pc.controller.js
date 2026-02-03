@@ -39,7 +39,7 @@ export const addPC = async (req, res) => {
   try {
     const { area, porqueSeTrajo, ip } = req.body;
 
-    if (!porqueSeTrajo || !ip) {
+    if (!area || !porqueSeTrajo || !ip) {
       return res.status(400).json({
         message: "Los campos 'area', 'porqueSeTrajo' y 'ip' son necesarios",
       });
@@ -61,11 +61,11 @@ export const addPC = async (req, res) => {
       usuarioAsignado: null,
       estado: "pendiente",
     });
-
+    
     const pcParaArreglarGuarda = await pcParaArreglar.save();
     res.status(201).json(pcParaArreglarGuarda);
   } catch (error) {
-    res.status(500).json({ error: error.massage });
+    res.status(500).json({ error: error.message }); 
   }
 };
 

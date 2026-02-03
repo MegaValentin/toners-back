@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User from "./user.model.js";
+import User from "./users.model.js";
 
 const { Schema } = mongoose;
 
@@ -55,7 +55,7 @@ const pcSchema = new mongoose.Schema(
   { toJSON: { getters: true }, toObject: { getters: true } }
 );
 
-todolistSchema.pre("save", async function (next) {
+pcSchema.pre("save", async function (next) {
   if (this.isModified("usuarioAsignado") && this.usuarioAsignado) {
     const usuario = await User.findOne({ username: this.usuarioAsignado });
     if (
@@ -70,7 +70,7 @@ todolistSchema.pre("save", async function (next) {
   next();
 });
 
-todolistSchema.pre("findOneAndUpdate", async function (next) {
+pcSchema.pre("findOneAndUpdate", async function (next) {
   const update = this.getUpdate();
 
   switch (update.estado) {
