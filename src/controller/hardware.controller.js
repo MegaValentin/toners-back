@@ -4,6 +4,10 @@ import PDFDocument from "pdfkit";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const getHardwares = async (req, res) => {
   try {
@@ -37,6 +41,8 @@ export const getHardware = async (req, res) => {
 export const addHardwares = async (req, res) => {
   try {
     const { hardware, area, description } = req.body;
+
+    const logoPath = path.join(__dirname, "../assets/logoReporteNuevo.jpg");
 
     if (!hardware || !area || !description) {
       return res.status(400).json({
@@ -77,12 +83,10 @@ export const addHardwares = async (req, res) => {
 
     doc.pipe(res);
 
-    doc.image(path.resolve("../logoReporte.jpg"), {
+    doc.image(logoPath, {
       fit: [150, 150],
       align: "center",
-      valign: "top",
     });
-
     doc.moveDown(6);
 
     doc.fontSize(12);
@@ -92,7 +96,7 @@ export const addHardwares = async (req, res) => {
       { locale: es }
     );
 
-    doc.text(`Bolivar, ${formattedDate}`, {
+    doc.text(`Bolívar, ${formattedDate}`, {
       align: "right",
     });
 
@@ -104,7 +108,7 @@ export const addHardwares = async (req, res) => {
     doc.text("Sra. Pia Pavia", {
       align: "left",
     });
-    doc.text("Municipalidad de Bolivar", {
+    doc.text("Municipalidad de Bolívar", {
       align: "left",
     });
 
@@ -250,6 +254,8 @@ export const downloadDocs = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const logoPath = path.join(__dirname, "../assets/logoReporteNuevo.jpg");
+
     const savedOrderHardware = await Hardware.findById(id);
     if (!savedOrderHardware) {
       return res.status(404).json({ message: "Orden no encontrada" });
@@ -265,10 +271,9 @@ export const downloadDocs = async (req, res) => {
       `attachment; filename=Orden_Hardware_${id}.pdf`
     );
     doc.pipe(res);
-    doc.image("../logoReporte.jpg", {
-      fit: [150, 150], // Tamaño del logo
+    doc.image(logoPath, {
+      fit: [150, 150],
       align: "center",
-      valign: "top",
     });
     doc.moveDown(4);
     const formattedDate = format(new Date(fecha), "d 'de' MMMM 'de' yyyy", {
@@ -324,7 +329,7 @@ export const downloadDocs = async (req, res) => {
 
     doc.moveDown(2);
 
-    doc.text("Departamento de Sistemas");
+    doc.text("Departamento de Informática");
 
     doc.end();
   } catch (error) {
