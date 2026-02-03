@@ -141,11 +141,11 @@ export const addHardwares = async (req, res) => {
     doc.x = doc.page.margins.left;
 
     doc.moveDown(2);
-    doc.fontSize(12)
+    doc.fontSize(12);
     doc.text(savedOrderHardware.description);
 
     doc.moveDown(2);
-    
+
     doc.text(
       "Sin otro particular aprovecho la oportunidad para saludarlo atte",
       { align: "right" }
@@ -164,6 +164,54 @@ export const addHardwares = async (req, res) => {
   }
 };
 
+export const updatedHardware = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { hardware, area, description } = req.body;
+
+    if (!hardware || !area || !description) {
+      return res.status(400).json({
+        message: "hardware, area y descripcion son requeridos",
+      });
+    }
+
+    const areaExists = await Areas.findById(area);
+    if (!areaExists) {
+      return res.status(404).json({
+        message: "Area no encontrda",
+      });
+    }
+
+    if (!Array.isArray(hardware) || hardware.length === 0) {
+      return res.status(400).json({
+        message: "Debe haber al menos un hardware",
+      });
+    }
+
+    const updated = await Hardware.findByIdAndUpdate(
+      id,
+      {
+        hardware,
+        area,
+        areaName: areaExists.area,
+        description,
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        message: "Orden actulizada correctamente",
+        order: updated,
+      });
+    }
+  } catch (error) {
+    console.error("Error actualizando orden:", error);
+    res.status(500).json({
+      message: "Error al actualizar orden",
+    });
+  }
+};
 export const deleteHardware = async (req, res) => {
   try {
     const hardwareDelete = await Hardware.findByIdAndDelete(req.params.id);

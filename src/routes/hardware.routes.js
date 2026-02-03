@@ -8,6 +8,7 @@ import {
   addHardwares,
   confirmOrderHardware,
   downloadDocs,
+  updatedHardware,
 } from "../controller/hardware.controller.js";
 const router = Router();
 
@@ -18,6 +19,8 @@ router.get("/hardware/:id", authRequired,verifyRole(['admin','superadmin']),  ge
 router.post("/addhardware", authRequired, verifyRole(['admin','superadmin']),addHardwares);
 
 router.delete("/hardware/:id", authRequired,verifyRole(['admin','superadmin']), deleteHardware);
+
+router.put("/hardware/:id", authRequired,verifyRole(['admin','superadmin']), updatedHardware);
 
 router.put("/hardware/:id/confirm", authRequired,verifyRole(['admin','superadmin']), confirmOrderHardware);
 
