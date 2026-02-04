@@ -1,4 +1,6 @@
 import Toners from "../models/toners.model.js";
+import Hardware from "../models/hardware.model.js"
+import Areas from "../models/areas.model.js"
 import xlsx from "xlsx";
 import fs from "fs";
 import excelJS from "exceljs";
@@ -267,6 +269,42 @@ export const docRecommendedTonersOrders = async (req, res) => {
       return res.status(404).json({ message: "No toner data available" });
     }
 
+    const hardwareItems = []
+
+    toners.forEach(t => {
+      const pedido = Math.max(t.cantidadIdeal - t.cantidad, 0)
+      if(pedido > 0){
+        hardwareItems.push({
+          nombre: `${t.marca} ${t.toner}`,
+          cantidad: pedido
+        })
+      }
+    })
+
+    if (hardwareItems.lenght === 0) {
+      return res.status(400).json({
+        message: "No hay toners para pedir"
+      })
+    }
+    const areaId = process.env.TONER_AREA_ID;
+    const areaExists = await Areas.findById(areaId)
+
+    if (!areaExists) {
+      return res.status(500).json({
+        message: "Area fija de toner no existe"
+      });
+    }
+
+    const ordenHardware = await Hardware.create({
+      hardware: hardwareItems,
+      area: areaId,
+      areaName: areaExists.area,
+      description: "Los toners seran utilzado para las diferentes areas del municipio",
+      consfirm: false
+    })
+
+    console.log("Orden hardware creada:", ordenHardware._id);
+
     const doc = new PDFDocument();
     res.setHeader("Content-type", "application/pdf");
     res.setHeader(
@@ -320,6 +358,7 @@ export const docRecommendedTonersOrders = async (req, res) => {
         0
       );
       if (pedidoRecomendado === 0) return;
+
       const y = tableTop + rowIndex * rowHeight;
       doc.rect(colMarcaX, y, colMarcaW, rowHeight).stroke();
       doc.rect(colTonersX, y, colTonersW, rowHeight).stroke();
