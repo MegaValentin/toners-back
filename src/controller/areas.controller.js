@@ -4,7 +4,7 @@ import fs from 'fs';
 
 export const getOffices = async (req, res) =>{
     try{
-        const offices = await Areas.find()
+        const offices = await Areas.find().sort({ area: 1 });
         res.json(offices)
 
     }catch(error){
