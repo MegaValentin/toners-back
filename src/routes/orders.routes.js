@@ -8,11 +8,9 @@ import {
   addOrders,
   getAreaUsage,
   deliveryToner,
-  getMonthlyReport,
-  getYearlyReport,
-  generateOrdersReport,
   cancelOrder,
   removeUndeliveredOrder,
+  generateReportComplet
 } from "../controller/orders.controller.js";
 
 import {
@@ -106,23 +104,9 @@ router.put(
 );
 
 router.get(
-  "/report/monthly",
-  authRequired,
-  verifyRole(["admin", "superadmin"]),
-  getMonthlyReport
-);
-
-router.get(
   "/reportuni/monthly",
   authRequired,
   verifyRole(["admin", "superadmin"])
-);
-
-router.get(
-  "/report/yearly",
-  authRequired,
-  verifyRole(["admin", "superadmin"]),
-  getYearlyReport
 );
 
 router.get(
@@ -160,16 +144,12 @@ router.delete(
 );
 
 router.get(
-  "/orders/report",
-  authRequired,
-  verifyRole(["admin", "superadmin"]),
-  generateOrdersReport
-);
-
-router.get(
   "/orderuni/report",
   authRequired,
   verifyRole(["admin", "superadmin"])
 );
 
+router.get("/generate-report", authRequired,
+verifyRole(["admin", "superadmin"]),
+generateReportComplet)
 export default router;

@@ -1,13 +1,13 @@
-import fs from 'fs';
-import xlsx from 'xlsx';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import xlsx from "xlsx";
+import path from "path";
+import { fileURLToPath } from "url";
 import Order from "../models/orders.model.js";
 import Toners from "../models/toners.model.js";
 import Areas from "../models/areas.model.js";
 import AreaUsage from "../models/areaUsage.model.js";
 import dotenv from "dotenv";
-import exceljs from 'exceljs';
+import exceljs from "exceljs";
 
 dotenv.config();
 
@@ -68,40 +68,44 @@ export const removeUndeliveredOrder = async (req, res) => {
   try {
     const order = await Order.findById(id);
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
 
     if (order.isDelivered) {
-      return res.status(400).json({ message: 'Delivered orders cannot be deleted' });
+      return res
+        .status(400)
+        .json({ message: "Delivered orders cannot be deleted" });
     }
 
     await Order.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Undelivered order deleted successfully' });
+    res.status(200).json({ message: "Undelivered order deleted successfully" });
   } catch (error) {
-    console.error('Error deleting undelivered order', error);
-    res.status(500).json({ message: 'Error deleting undelivered order', error });
+    console.error("Error deleting undelivered order", error);
+    res
+      .status(500)
+      .json({ message: "Error deleting undelivered order", error });
   }
 };
 
 export const deliveryToner = async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     const order = await Order.findById(id);
     if (order) {
       const toner = await Toners.findById(order.toner);
       if (toner) {
         if (toner.cantidad < order.cantidad) {
-          return res.status(400).json({ message: 'No hay toner' });
+          return res.status(400).json({ message: "No hay toner" });
         }
         toner.cantidad -= order.cantidad;
         if (toner.stock < 0) {
-          toner.stock = 0; 
+          toner.stock = 0;
         }
-        await toner.save(); 
+        await toner.save();
 
         order.isDelivered = true;
-        await order.save(); 
+        await order.save();
 
         let areaUsage = await AreaUsage.findOne({ area: order.area });
         if (!areaUsage) {
@@ -125,19 +129,23 @@ export const deliveryToner = async (req, res) => {
           });
         }
 
+        areaUsage.fecha = new Date();
+
         await areaUsage.save();
 
-        res.status(200).json({ message: 'Order delivered and stock updated', order });
+        res
+          .status(200)
+          .json({ message: "Order delivered and stock updated", order });
       } else {
-        res.status(404).json({ message: 'Toner not found' });
+        res.status(404).json({ message: "Toner not found" });
       }
     } else {
-      res.status(404).json({ message: 'Order not found' });
+      res.status(404).json({ message: "Order not found" });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Error updating order and stock', error });
+    res.status(500).json({ message: "Error updating order and stock", error });
   }
-}
+};
 
 export const addOrders = async (req, res) => {
   try {
@@ -162,7 +170,6 @@ export const addOrders = async (req, res) => {
         message: "El area especificado no existe",
       });
     }
-    
 
     const newOrder = new Order({
       toner,
@@ -176,7 +183,6 @@ export const addOrders = async (req, res) => {
 
     const savedOrder = await newOrder.save();
 
-    
     await tonerExists.save();
 
     res.status(201).json(savedOrder);
@@ -189,33 +195,36 @@ export const addOrders = async (req, res) => {
 };
 
 export const cancelOrder = async (req, res) => {
-  const {id} = req.params
+  const { id } = req.params;
 
   try {
-    const order = await Order.findById(id)
+    const order = await Order.findById(id);
 
-    if(!order){
-      return res.status(404).json({message: 'Order not found'})
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    if(!order.isDelivered){
-      return res.status(400).json({message: 'Order is not delivered, so it cannot be canceled'})
+    if (!order.isDelivered) {
+      return res
+        .status(400)
+        .json({ message: "Order is not delivered, so it cannot be canceled" });
     }
 
-    const toner = await Toners.findById(order.toner)
-    if(!toner){
-      return res.status(404).json({message: 'Toner not found'})
+    const toner = await Toners.findById(order.toner);
+    if (!toner) {
+      return res.status(404).json({ message: "Toner not found" });
     }
 
-    toner.cantidad += order.cantidad
-    await toner.save()
+    toner.cantidad += order.cantidad;
+    await toner.save();
 
-    let areaUsage = await AreaUsage.findOne({area: order.area})
-    if(areaUsage){
-      const tonerUsageIndex = areaUsage.toners.findIndex((t)=>
-      t.toner.equals(order.toner))
+    let areaUsage = await AreaUsage.findOne({ area: order.area });
+    if (areaUsage) {
+      const tonerUsageIndex = areaUsage.toners.findIndex((t) =>
+        t.toner.equals(order.toner)
+      );
 
-      if(tonerUsageIndex !== -1) {
+      if (tonerUsageIndex !== -1) {
         areaUsage.toners[tonerUsageIndex].cantidad -= order.cantidad;
         if (areaUsage.toners[tonerUsageIndex].cantidad <= 0) {
           areaUsage.toners.splice(tonerUsageIndex, 1);
@@ -224,16 +233,20 @@ export const cancelOrder = async (req, res) => {
 
       await areaUsage.save();
 
-    order.isDelivered = false;
-    await order.save();
+      order.isDelivered = false;
+      await order.save();
 
-    res.status(200).json({ message: 'Order canceled and stock updated', order });
+      res
+        .status(200)
+        .json({ message: "Order canceled and stock updated", order });
     }
   } catch (error) {
-    console.error('Error canceling order and updating stock', error);
-    res.status(500).json({ message: 'Error canceling order and updating stock', error });
+    console.error("Error canceling order and updating stock", error);
+    res
+      .status(500)
+      .json({ message: "Error canceling order and updating stock", error });
   }
-}
+};
 
 export const getAreaUsage = async (req, res) => {
   try {
@@ -242,154 +255,12 @@ export const getAreaUsage = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: "error al buscar las ordenes" });
   }
-}
-
-export const getMonthlyReport = async (req, res) => {
-  const { month, year } = req.query;
-  const startDate = new Date(year, month - 1, 1);
-  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
-
-  try {
-    const orders = await Order.aggregate([
-      {
-        $match: {
-          isDelivered: true, // Solo tomar en cuenta las órdenes entregadas
-          fecha: {
-            $gte: startDate,
-            $lte: endDate
-          }
-        }
-      },
-      {
-        $group: {
-          _id: { area: "$areaName", toner: "$tonerName" },
-          totalCantidad: { $sum: "$cantidad" }
-        }
-      },
-      {
-        $group: {
-          _id: "$_id.area",
-          toners: {
-            $push: {
-              toner: "$_id.toner",
-              cantidad: "$totalCantidad"
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          areaName: "$_id",
-          toners: 1
-        }
-      }
-    ]);
-
-    const workbook = new exceljs.Workbook();
-    const worksheet = workbook.addWorksheet('Reporte Mensual');
-
-    worksheet.columns = [
-      { header: 'Área', key: 'areaName', width: 30 },
-      { header: 'Toner', key: 'toner', width: 30 },
-      { header: 'Cantidad', key: 'cantidad', width: 20 }
-    ];
-
-    orders.forEach((order) => {
-      const { areaName, toners } = order;
-      toners.forEach((toner) => {
-        worksheet.addRow({
-          areaName: areaName,
-          toner: toner.toner,
-          cantidad: toner.cantidad
-        });
-      });
-    });
-
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=Reporte_Mensual.xlsx');
-
-    await workbook.xlsx.write(res);
-    res.end();
-
-  } catch (error) {
-    res.status(500).json({ message: "Error al generar el reporte mensual", error });
-  }
-}
-
-
-export const getYearlyReport = async (req, res) => {
-  const {year } = req.query
-  const startDate = new Date(year, 0, 1)
-  const endDate = new Date(year, 11, 31)
-
-  try {
-    const areaUsage = await AreaUsage.aggregate([
-      {
-        $match: {
-          fecha: {
-            $gte: startDate,
-            $lte: endDate
-          }
-        }
-      },
-      {
-        $unwind: "$toners"
-      },
-      {
-        $group: {
-          _id: { area: "$area", areaName: "$areaName" },
-          toners: {
-            $push: {
-              toner: "$toners.tonerName",
-              cantidad: "$toners.cantidad"
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          areaName: "$_id.areaName",
-          toners: 1
-        }
-      }
-    ]);
-
-    const workbook = new exceljs.Workbook();
-    const worksheet = workbook.addWorksheet('Reporte Mensual');
-
-    worksheet.columns = [
-      { header: 'Área', key: 'areaName', width: 30 },
-      { header: 'Toner', key: 'toner', width: 30 },
-      { header: 'Cantidad', key: 'cantidad', width: 20 }
-    ];
-
-    areaUsage.forEach((usage) => {
-      const { areaName, toners } = usage;
-      toners.forEach((toner) => {
-        worksheet.addRow({
-          areaName: areaName,
-          toner: toner.toner,
-          cantidad: toner.cantidad
-        });
-      });
-    });
-
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=Reporte_Mensual.xlsx');
-
-    await workbook.xlsx.write(res);
-    res.end();
-  } catch (error) {
-    res.status(500).json({ message: "Error al generar el reporte anual", error });
-  }
-}
+};
 
 export const createStock = async (req, res) => {
   const file = req.file;
   if (!file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+    return res.status(400).json({ error: "No file uploaded" });
   }
 
   try {
@@ -399,69 +270,149 @@ export const createStock = async (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
-
     for (const row of jsonData) {
       const { Toner, cantidad } = row;
-      const newIdealStock = new stockIdeal({ toner: Toner, stockIdeal: cantidad });
+      const newIdealStock = new stockIdeal({
+        toner: Toner,
+        stockIdeal: cantidad,
+      });
       await newIdealStock.save();
     }
 
-
     fs.unlinkSync(file.path);
 
-    res.status(201).json({ message: 'Stock ideal creado desde el archivo Excel' });
+    res
+      .status(201)
+      .json({ message: "Stock ideal creado desde el archivo Excel" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 
-export const generateOrdersReport = async (req, res) => {
+export const generateReportComplet = async (req, res) => {
+  const { year } = req.query;
+
+  if (!year || isNaN(year)) {
+    return res.status(400).json({
+      message: "El parametro year es requerido",
+    });
+  }
+
+  const startDate = new Date(Number(year), 0, 1);
+  const endDate = new Date(Number(year), 11, 31, 23, 59, 59);
+
   try {
-    
-    const orders = await Order.find().sort({ fecha: -1 });
+    const orders = await Order.find({
+      fecha: { $gte: startDate, $lte: endDate },
+    }).sort({ fecha: 1 });
 
-    
     const workbook = new exceljs.Workbook();
-    const worksheet = workbook.addWorksheet('Reporte de Órdenes');
+    //hoja1
+    const ordersSheet = workbook.addWorksheet("Órdenes");
 
-    
-    worksheet.columns = [
-      { header: 'Fecha', key: 'fecha', width: 20 },
-      { header: 'Área', key: 'areaName', width: 30 },
-      { header: 'Toner', key: 'tonerName', width: 30 },
-      { header: 'Cantidad', key: 'cantidad', width: 10 },
-      { header: 'Estado', key: 'isDelivered', width: 15 },
+    ordersSheet.columns = [
+      { header: "Fecha", key: "fecha", width: 20 },
+      { header: "Área", key: "areaName", width: 20 },
+      { header: "Toner", key: "tonerName", width: 20 },
+      { header: "Cantidad", key: "cantidad", width: 10 },
+      { header: "Estado", key: "estado", width: 20 },
     ];
 
-    
     orders.forEach((order) => {
-      const formattedDate = new Date(order.fecha).toLocaleDateString()
-      worksheet.addRow({
-        fecha: formattedDate,
+      ordersSheet.addRow({
+        fecha: new Date(order.fecha).toLocaleDateString(),
         areaName: order.areaName,
         tonerName: order.tonerName,
         cantidad: order.cantidad,
-        isDelivered: order.isDelivered ? 'Entregado' : 'No Entregado',
+        estado: order.isDelivered ? "Entregado" : "Pendiente",
       });
     });
 
+    ordersSheet.getRow(1).font = { bold: true };
+
+    //hoja2
+    const areaConsumption = {};
+
+    orders.forEach((order) => {
+      if (!order.isDelivered) return;
+
+      if (!areaConsumption[order.areaName]) {
+        areaConsumption[order.areaName] = {};
+      }
+
+      if (!areaConsumption[order.areaName][order.tonerName]) {
+        areaConsumption[order.areaName][order.tonerName] = 0;
+      }
+
+      areaConsumption[order.areaName][order.tonerName] += order.cantidad;
+    });
+
+    const areaSheet = workbook.addWorksheet("Consumo por Área");
+
+    areaSheet.columns = [
+      { header: "Área", key: "area", width: 30 },
+      { header: "Toner", key: "toner", width: 30 },
+      { header: "Cantidad", key: "cantidad", width: 15 },
+    ];
+
+    Object.entries(areaConsumption).forEach(([area, toners]) => {
+      Object.entries(toners).forEach(([toner, cantidad]) => {
+        areaSheet.addRow({
+          area,
+          toner,
+          cantidad,
+        });
+      });
+    });
+
+    areaSheet.getRow(1).font = { bold: true };
+    //hoja3
+    const tonerConsumption = {};
+
+    orders.forEach((order) => {
+      if (!order.isDelivered) return;
+
+      if (!tonerConsumption[order.tonerName]) {
+        tonerConsumption[order.tonerName] = 0;
+      }
+
+      tonerConsumption[order.tonerName] += order.cantidad;
+    });
+
+    const tonerSheet = workbook.addWorksheet("Consumo por Toner");
+
+    tonerSheet.columns = [
+      { header: "Toner", key: "toner", width: 30 },
+      { header: "Total Usados", key: "total", width: 20 },
+    ];
+
+    Object.entries(tonerConsumption).forEach(([toner, total]) => {
+      tonerSheet.addRow({
+        toner,
+        total,
+      });
+    });
+
+    tonerSheet.getRow(1).font = { bold: true };
     
     res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
-    res.setHeader(
-      'Content-Disposition',
-      'attachment; filename=Reporte_Ordenes.xlsx'
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
 
-    
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Reporte_Toners_${year}.xlsx`
+    );
+
     await workbook.xlsx.write(res);
+
     res.end();
   } catch (error) {
-    console.error('Error generating orders report:', error);
-    res
-      .status(500)
-      .json({ message: 'Error generating orders report', error });
+    console.error("Error generating report:", error);
+
+    res.status(500).json({
+      message: "Error generating report",
+    });
   }
 };
